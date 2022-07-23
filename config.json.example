@@ -1,0 +1,6 @@
+{
+    "host": "YOUR_GITEA_INSTANCE",
+    "token": "YOUR_TOKEN",
+    "uid": 0,
+    "search_archived_repos": false
+}
