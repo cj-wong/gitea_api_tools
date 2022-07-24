@@ -93,4 +93,4 @@ SEARCH_ARCHIVED_REPOS = bool(CONF['search_archived_repos'])
 # Other configuration
 
 SWAGGER_API_LIMIT = 999_999_999
-PACKAGE_VERSION = re.compile(r'^[0-9]\.[0-9]\.[0-9]$')
+PACKAGE_VERSION = re.compile(r'^[0-9]+\.[0-9]+\.[0-9]+$')
