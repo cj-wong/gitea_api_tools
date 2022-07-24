@@ -75,10 +75,11 @@ elif TOKEN == _DEFAULTS['token']:
 elif HOST == _DEFAULTS['host']:
     LOGGER.error('Enter your own Gitea instance under "host".')
     sys.exit(EXIT_CONFIG_DEFAULT_VALUES)
-elif 'uid' in CONF and type(CONF['uid']) is not int and not CONF['uid'].isnum():
-    LOGGER.error('User IDs ("uid") are strictly numbers and optional.')
-    LOGGER.error('If not used, delete the key-value pair for "uid".')
-    sys.exit(EXIT_CONFIG_DEFAULT_VALUES)
+elif 'uid' in CONF:
+    if type(CONF['uid']) is not int and not CONF['uid'].isnum():
+        LOGGER.error('User IDs ("uid") are strictly numbers and optional.')
+        LOGGER.error('If not used, delete the key-value pair for "uid".')
+        sys.exit(EXIT_CONFIG_DEFAULT_VALUES)
 elif 'uid' not in CONF:
     CONF['uid'] = 0
 
