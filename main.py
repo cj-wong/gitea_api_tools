@@ -6,6 +6,7 @@ from typing import List, Tuple
 import requests
 
 import config
+import utils
 
 
 REPOS = List[Tuple[str, str]]
@@ -27,13 +28,53 @@ def list_repos() -> REPOS:
     return [repo["full_name"].split('/') for repo in repos]
 
 
-def compare_dependency(repos: REPOS, p_name: str, p_ver: str) -> None:
+def get_outdated_dep_version(
+        dependencies: List[str], p_name: str, p_ver: utils.Version) -> str:
+    """Get the requirement version, if present.
+
+    Args:
+        dependencies (List[str]): list of dependencies in the format
+            'req==x.y.z'
+        p_name (str): package name
+        p_ver (utils.Version): package version as an object
+
+    Returns:
+        str: the version of the outdated package
+
+    Raises:
+        utils.NoDedendency: package was not found in this project or version
+            could not be adequately compared
+
+    """
+    for dependency in dependencies:
+        d_name, d_ver = dependency.split('==')
+        if d_name != p_name:
+            continue
+        try:
+            if p_ver > utils.Version(d_ver):
+                return d_ver
+        except TypeError:
+            config.LOGGER.warning(f"Could not compare {p_ver} and {d_ver}")
+            raise utils.NoDependency
+        except ValueError:
+            # Implicitly raised by comparison between Versions. Raised when the
+            # number of components don't match between versions.
+            # e.g. x.y.z compared against x.y
+            config.LOGGER.warning(f"{p_ver} can't be compared against {d_ver}")
+            config.LOGGER.warning(f"The version format may be different.")
+            raise utils.NoDependency
+
+    raise utils.NoDependency
+
+
+def compare_dependency(
+        repos: REPOS, p_name: str, p_ver: utils.Version) -> None:
     """Compare dependency against Python-only repositories.
 
     Args:
         repos (REPOS): list of repositories
         p_name (str): package name
-        p_ver (str): package version; usually in format x.y.z
+        p_ver (utils.Version): package version as an object
 
     Raises:
         ValueError: unknown encoding detected in requirements file
@@ -56,21 +97,14 @@ def compare_dependency(repos: REPOS, p_name: str, p_ver: str) -> None:
         if resp_cont['encoding'] != 'base64':
             raise ValueError(f"Unknown encoding {resp_cont['encoding']}")
         else:
-            requirements = [
-                requirement.split('==')
-                for requirement in
-                base64.b64decode(resp_cont['content']).decode().split()
-                ]
+            requirements = (
+                base64.b64decode(resp_cont['content']).decode().split())
             try:
-                version, = [
-                    version
-                    for (package, version) in requirements
-                    if package == p_name
-                    ]
-            except ValueError:
+                dep_ver = get_outdated_dep_version(requirements, p_name, p_ver)
+            except utils.NoDependency:
                 continue
-            if p_ver > version:
-                config.LOGGER.info(f"{user}/{repo} is outdated: {version}")
+            else:
+                config.LOGGER.info(f"{user}/{repo} is outdated: {dep_ver}")
                 outdated += 1
 
     if not outdated:
@@ -85,9 +119,10 @@ def main() -> None:
     package_name, package_ver = sys.argv[1:]
     if not config.PACKAGE_VERSION.match(package_ver):
         config.LOGGER.warning(f"{package_ver} does not appear to match x.y.z.")
+        config.LOGGER.warning("Comparisons may not work correctly.")
 
     repos = list_repos()
-    compare_dependency(repos, package_name, package_ver)
+    compare_dependency(repos, package_name, utils.Version(package_ver))
 
 
 if __name__ == '__main__':
