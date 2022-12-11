@@ -48,8 +48,8 @@ def get_outdated_dep_version(
         str: the version of the outdated package
 
     Raises:
-        utils.NoDedendency: package was not found in this project or version
-            could not be adequately compared
+        utils.NoDedendency: package was not found in this project
+        utils.MismatchedDependency: version could not be adequately compared
 
     """
     for dependency in dependencies:
@@ -60,15 +60,15 @@ def get_outdated_dep_version(
             if p_ver > utils.Version(d_ver):
                 return d_ver
         except TypeError:
-            config.LOGGER.warning(f"Could not compare {p_ver} and {d_ver}")
-            raise utils.NoDependency
+            config.LOGGER.warning(f"{p_ver} can't be compared against {d_ver}")
+            raise utils.MismatchedDependency
         except ValueError:
             # Implicitly raised by comparison between Versions. Raised when the
             # number of components don't match between versions.
             # e.g. x.y.z compared against x.y
             config.LOGGER.warning(f"{p_ver} can't be compared against {d_ver}")
             config.LOGGER.warning("The version format may be different.")
-            raise utils.NoDependency
+            raise utils.MismatchedDependency
 
     raise utils.NoDependency
 
@@ -88,7 +88,8 @@ def compare_dependency(
     """
     outdated = 0
     for user, repo in repos:
-        url = f"{config.HOST_API}/repos/{user}/{repo}"
+        u_repo = f"{user}/{repo}"
+        url = f"{config.HOST_API}/repos/{u_repo}"
         response = requests.get(f"{url}/languages", headers=config.HEADERS)
         if not response.encoding:
             config.LOGGER.error(NO_ENCODING.format("checking languages"))
@@ -99,7 +100,6 @@ def compare_dependency(
         response = requests.get(
             f"{url}/contents/requirements.txt", headers=config.HEADERS)
         if response.status_code != 200:
-            config.LOGGER.error("Couldn't retrieve requirements.txt")
             continue
         elif not response.encoding:
             config.LOGGER.error(NO_ENCODING.format("getting requirements.txt"))
@@ -116,8 +116,11 @@ def compare_dependency(
                 dep_ver = get_outdated_dep_version(requirements, p_name, p_ver)
             except utils.NoDependency:
                 continue
+            except utils.MismatchedDependency:
+                config.LOGGER.warning(f"The affected repository is {u_repo}")
+                continue
             else:
-                config.LOGGER.info(f"{user}/{repo} is outdated: {dep_ver}")
+                config.LOGGER.info(f"{u_repo} is outdated: {dep_ver}")
                 outdated += 1
 
     if not outdated:

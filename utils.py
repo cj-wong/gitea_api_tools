@@ -97,3 +97,11 @@ class NoDependency(BaseException):
     def __init__(self) -> None:
         """Initialize with error message."""
         super().__init__("Dependency was not found")
+
+
+class MismatchedDependency(BaseException):
+    """Dependency had a different format and couldn't be directly compared."""
+
+    def __init__(self) -> None:
+        """Initialize with error message."""
+        super().__init__("Dependency could not be compared")
