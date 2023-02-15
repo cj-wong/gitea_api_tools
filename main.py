@@ -114,7 +114,8 @@ def compare_dependency(
             raise ValueError(f"Unknown encoding {resp_cont['encoding']}")
         else:
             requirements = (
-                base64.b64decode(resp_cont['content']).decode().split())
+                base64.b64decode(
+                    resp_cont['content']).decode().strip().split('\n'))
             try:
                 dep_ver = get_outdated_dep_version(requirements, p_name, p_ver)
             except utils.NoDependency:
