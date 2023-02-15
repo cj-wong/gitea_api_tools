@@ -53,7 +53,10 @@ def get_outdated_dep_version(
 
     """
     for dependency in dependencies:
-        d_name, d_ver = dependency.split('==')
+        try:
+            d_name, d_ver = dependency.split('==')
+        except ValueError as e:
+            raise utils.CouldNotParseDependency from e
         if d_name != p_name:
             continue
         try:
@@ -117,6 +120,11 @@ def compare_dependency(
             except utils.NoDependency:
                 continue
             except utils.MismatchedDependency:
+                config.LOGGER.warning("Encountered an error matching deps")
+                config.LOGGER.warning(f"The affected repository is {u_repo}")
+                continue
+            except utils.CouldNotParseDependency:
+                config.LOGGER.warning("Encountered an error parsing deps")
                 config.LOGGER.warning(f"The affected repository is {u_repo}")
                 continue
             else:

@@ -105,3 +105,11 @@ class MismatchedDependency(BaseException):
     def __init__(self) -> None:
         """Initialize with error message."""
         super().__init__("Dependency could not be compared")
+
+
+class CouldNotParseDependency(ValueError):
+    """Dependency did not match expected format."""
+
+    def __init__(self) -> None:
+        """Initialize with error message."""
+        super().__init__("Could not parse dependency")
