@@ -1,6 +1,6 @@
+import argparse
 import base64
 import json
-import sys
 from typing import List, Tuple
 
 import requests
@@ -11,6 +11,11 @@ import utils
 
 REPOS = List[Tuple[str, str]]
 NO_ENCODING = "No encoding was detected when {}"
+
+parser = argparse.ArgumentParser(
+    description="Python dependency scanner for Gitea API")
+parser.add_argument("package", type=str, help="package name on PyPI")
+parser.add_argument("version", type=str, help="package version")
 
 
 def list_repos() -> REPOS:
@@ -138,16 +143,15 @@ def compare_dependency(
 
 def main() -> None:
     """Run all of the API requests."""
-    if len(sys.argv) != 3:
-        config.LOGGER.error("Usage: main.py PACKAGE_NAME PACKAGE_VER")
-        sys.exit(config.EXIT_NO_ARGS)
-    package_name, package_ver = sys.argv[1:]
-    if not config.PACKAGE_VERSION.match(package_ver):
-        config.LOGGER.warning(f"{package_ver} does not appear to match x.y.z.")
+    args = parser.parse_args()
+    pkg_name = args.package
+    pkg_ver = args.version
+    if not config.PACKAGE_VERSION.match(pkg_ver):
+        config.LOGGER.warning(f"{pkg_ver} does not appear to match x.y.z.")
         config.LOGGER.warning("Comparisons may not work correctly.")
 
     repos = list_repos()
-    compare_dependency(repos, package_name, utils.Version(package_ver))
+    compare_dependency(repos, pkg_name, utils.Version(pkg_ver))
 
 
 if __name__ == '__main__':
