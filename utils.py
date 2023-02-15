@@ -1,4 +1,34 @@
 import re
+from base64 import b64decode
+
+
+def decode(text: str, encoding: str) -> str:
+    """Decode provided text with its encoding.
+
+    This function is to be used with API calls that may not return encoding in
+    UTF-8. For example, some API calls return Base64 encoding.
+
+    It's uncertain whether Gitea has other encoding besides Base64, however.
+
+    Args:
+        text: encoded text
+        encoding: encoding of text
+
+    Returns:
+        str: decoded text
+
+    Raises:
+        ValueError: unknown encoding provided
+
+    """
+    known_encodings = {
+        'base64': lambda text: b64decode(text).decode(),
+        }
+
+    if encoding not in known_encodings:
+        raise ValueError(f"Unknown encoding {encoding}")
+
+    return known_encodings[encoding](text).strip()
 
 
 class Version:

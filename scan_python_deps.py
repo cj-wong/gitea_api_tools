@@ -1,5 +1,4 @@
 import argparse
-import base64
 import json
 from typing import List, Tuple
 
@@ -102,9 +101,11 @@ def compare_dependency(
         if not response.encoding:
             config.LOGGER.error(NO_ENCODING.format("checking languages"))
             continue
+
         langs = json.loads(response.content.decode(response.encoding))
         if 'Python' not in langs:
             continue
+
         response = requests.get(
             f"{url}/contents/requirements.txt", headers=config.HEADERS)
         if response.status_code != 200:
@@ -112,30 +113,32 @@ def compare_dependency(
         elif not response.encoding:
             config.LOGGER.error(NO_ENCODING.format("getting requirements.txt"))
             continue
+
         resp_cont = json.loads(response.content.decode(response.encoding))
-        # Uncertain whether Gitea has other encoding besides base64
-        # for file contents
-        if resp_cont['encoding'] != 'base64':
-            raise ValueError(f"Unknown encoding {resp_cont['encoding']}")
+        text = resp_cont['content']
+        encoding = resp_cont['encoding']
+
+        try:
+            requirements = utils.decode(text, encoding).split('\n')
+        except ValueError as e:
+            # Unknown encoding
+            raise e
+
+        try:
+            dep_ver = get_outdated_dep_version(requirements, p_name, p_ver)
+        except utils.NoDependency:
+            continue
+        except utils.MismatchedDependency:
+            config.LOGGER.warning("Encountered an error matching deps")
+            config.LOGGER.warning(f"The affected repository is {u_repo}")
+            continue
+        except utils.CouldNotParseDependency:
+            config.LOGGER.warning("Encountered an error parsing deps")
+            config.LOGGER.warning(f"The affected repository is {u_repo}")
+            continue
         else:
-            requirements = (
-                base64.b64decode(
-                    resp_cont['content']).decode().strip().split('\n'))
-            try:
-                dep_ver = get_outdated_dep_version(requirements, p_name, p_ver)
-            except utils.NoDependency:
-                continue
-            except utils.MismatchedDependency:
-                config.LOGGER.warning("Encountered an error matching deps")
-                config.LOGGER.warning(f"The affected repository is {u_repo}")
-                continue
-            except utils.CouldNotParseDependency:
-                config.LOGGER.warning("Encountered an error parsing deps")
-                config.LOGGER.warning(f"The affected repository is {u_repo}")
-                continue
-            else:
-                config.LOGGER.info(f"{u_repo} is outdated: {dep_ver}")
-                outdated += 1
+            config.LOGGER.info(f"{u_repo} is outdated: {dep_ver}")
+            outdated += 1
 
     if not outdated:
         config.LOGGER.info("No packages are affected")
