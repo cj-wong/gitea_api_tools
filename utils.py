@@ -99,7 +99,7 @@ class NoDependency(BaseException):
         super().__init__("Dependency was not found")
 
 
-class MismatchedDependency(BaseException):
+class MismatchedDependency(ValueError):
     """Dependency had a different format and couldn't be directly compared."""
 
     def __init__(self) -> None:
