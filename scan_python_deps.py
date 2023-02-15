@@ -40,15 +40,15 @@ def get_outdated_dep_version(
     """Get the requirement version, if present.
 
     Args:
-        dependencies (List[str]): list of dependencies in the format
-            'req==x.y.z'
-        p_name (str): package name
-        p_ver (utils.Version): package version as an object
+        dependencies: list of dependencies in the format 'req==x.y.z'
+        p_name: package name
+        p_ver: package version as an object
 
     Returns:
         str: the version of the outdated package
 
     Raises:
+        utils.CouldNotParseDependency: dependency format could not be parsed
         utils.NoDedendency: package was not found in this project
         utils.MismatchedDependency: version could not be adequately compared
 
@@ -82,9 +82,9 @@ def compare_dependency(
     """Compare dependency against Python-only repositories.
 
     Args:
-        repos (REPOS): list of repositories
-        p_name (str): package name
-        p_ver (utils.Version): package version as an object
+        repos: list of repositories
+        p_name: package name
+        p_ver: package version as an object
 
     Raises:
         ValueError: unknown encoding detected in requirements file

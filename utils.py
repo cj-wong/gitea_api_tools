@@ -64,7 +64,7 @@ class Version:
         """Initialize the version with its string form.
 
         Args:
-            ver_str (str): version in string form
+            ver_str: version in string form
 
         """
         self.original = ver_str
