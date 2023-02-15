@@ -2,8 +2,6 @@ import argparse
 import json
 from typing import List, Tuple
 
-import requests
-
 import config
 import utils
 
@@ -30,7 +28,7 @@ def list_repos() -> REPOS:
     url = f"{url}&archived={config.SEARCH_ARCHIVED_REPOS}"
     if config.UID:
         url = f"{url}&uid={config.UID}"
-    response = requests.get(url, headers=config.HEADERS)
+    response = utils.request_get(url)
     if not response.encoding:
         raise RuntimeError(config.NO_ENCODING.format("fetching repos"))
     repos = json.loads(response.content.decode(response.encoding))['data']
@@ -96,7 +94,7 @@ def compare_dependency(
     for user, repo in repos:
         u_repo = f"{user}/{repo}"
         url = f"{config.HOST_API}/repos/{u_repo}"
-        response = requests.get(f"{url}/languages", headers=config.HEADERS)
+        response = utils.request_get(f"{url}/languages")
         if not response.encoding:
             config.LOGGER.error(
                 config.NO_ENCODING.format("checking languages"))
@@ -106,8 +104,7 @@ def compare_dependency(
         if 'Python' not in langs:
             continue
 
-        response = requests.get(
-            f"{url}/contents/requirements.txt", headers=config.HEADERS)
+        response = utils.request_get(f"{url}/contents/requirements.txt")
         if response.status_code != 200:
             continue
         elif not response.encoding:

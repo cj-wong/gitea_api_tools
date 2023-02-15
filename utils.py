@@ -1,6 +1,15 @@
 import re
 from base64 import b64decode
 
+import requests
+
+import config
+
+
+def request_get(url: str) -> requests.models.Response:
+    """Call requests.get with headers from config."""
+    return requests.get(url, headers=config.HEADERS)
+
 
 def decode(text: str, encoding: str) -> str:
     """Decode provided text with its encoding.

@@ -1,8 +1,7 @@
 import json
 
-import requests
-
 import config
+import utils
 
 
 def get_user_id() -> int:
@@ -15,7 +14,7 @@ def get_user_id() -> int:
         RuntimeError: could not get encoding
 
     """
-    response = requests.get(f"{config.HOST_API}/user", headers=config.HEADERS)
+    response = utils.request_get(f"{config.HOST_API}/user")
     if not response.encoding:
         raise RuntimeError(config.NO_ENCODING.format("user"))
 
