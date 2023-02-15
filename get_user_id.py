@@ -15,7 +15,9 @@ def get_user_id() -> int:
 
     """
     response = utils.request_get(f"{config.HOST_API}/user")
-    if not response.encoding:
+    if response.status_code != 200:
+        raise RuntimeError("Could not user information")
+    elif not response.encoding:
         raise RuntimeError(config.NO_ENCODING.format("user"))
 
     user = json.loads(response.content.decode(response.encoding))
