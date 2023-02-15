@@ -1,12 +1,10 @@
-# Python Dependency Scanner for [Gitea] API
+# Tools for [Gitea] API
 
 ## Overview
 
-This project scans all of your [Gitea] repositories for dependencies. The intended use case is this: if you use [Gitea] as the main remote or a mirror for your repositories, you can rapidly scan your repositories for dependency versions. This combined with GitHub's dependabot makes checking your packages much easier.
+This project contains tools as scripts to manipulate [Gitea] settings.
 
-## Usage
-
-`$ python main.py PACKAGE_NAME PACKAGE_VER`
+For detailed information, consult [docs](docs).
 
 ## Requirements
 
