@@ -9,7 +9,6 @@ import utils
 
 
 REPOS = List[Tuple[str, str]]
-NO_ENCODING = "No encoding was detected when {}"
 
 parser = argparse.ArgumentParser(
     description="Python dependency scanner for Gitea API")
@@ -33,7 +32,7 @@ def list_repos() -> REPOS:
         url = f"{url}&uid={config.UID}"
     response = requests.get(url, headers=config.HEADERS)
     if not response.encoding:
-        raise RuntimeError(NO_ENCODING.format("fetching repos"))
+        raise RuntimeError(config.NO_ENCODING.format("fetching repos"))
     repos = json.loads(response.content.decode(response.encoding))['data']
     return [repo["full_name"].split('/') for repo in repos]
 
@@ -99,7 +98,8 @@ def compare_dependency(
         url = f"{config.HOST_API}/repos/{u_repo}"
         response = requests.get(f"{url}/languages", headers=config.HEADERS)
         if not response.encoding:
-            config.LOGGER.error(NO_ENCODING.format("checking languages"))
+            config.LOGGER.error(
+                config.NO_ENCODING.format("checking languages"))
             continue
 
         langs = json.loads(response.content.decode(response.encoding))
@@ -111,7 +111,8 @@ def compare_dependency(
         if response.status_code != 200:
             continue
         elif not response.encoding:
-            config.LOGGER.error(NO_ENCODING.format("getting requirements.txt"))
+            config.LOGGER.error(
+                config.NO_ENCODING.format("getting requirements.txt"))
             continue
 
         resp_cont = json.loads(response.content.decode(response.encoding))
