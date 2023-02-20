@@ -1,38 +1,14 @@
 import argparse
 import json
-from typing import List, Tuple
+from typing import List
 
 import config
 import utils
-
-
-REPOS = List[Tuple[str, str]]
 
 parser = argparse.ArgumentParser(
     description="Python dependency scanner for Gitea API")
 parser.add_argument("package", type=str, help="package name on PyPI")
 parser.add_argument("version", type=str, help="package version")
-
-
-def list_repos() -> REPOS:
-    """List the repositories on the host.
-
-    Returns:
-        REPOS: list of repositories in the format (owner, repo_name)
-
-    Raises:
-        RuntimeError: no encoding detected in request; request may be invalid
-
-    """
-    url = f"{config.HOST_API}/repos/search?limit={config.SWAGGER_API_LIMIT}"
-    url = f"{url}&archived={config.SEARCH_ARCHIVED_REPOS}"
-    if config.UID:
-        url = f"{url}&uid={config.UID}"
-    response = utils.request_get(url)
-    if not response.encoding:
-        raise RuntimeError(config.NO_ENCODING.format("fetching repos"))
-    repos = json.loads(response.content.decode(response.encoding))['data']
-    return [repo["full_name"].split('/') for repo in repos]
 
 
 def get_outdated_dep_version(
@@ -78,7 +54,7 @@ def get_outdated_dep_version(
 
 
 def compare_dependency(
-        repos: REPOS, p_name: str, p_ver: utils.Version) -> None:
+        repos: utils.REPOS, p_name: str, p_ver: utils.Version) -> None:
     """Compare dependency against Python-only repositories.
 
     Args:
@@ -151,7 +127,7 @@ def main() -> None:
         config.LOGGER.warning(f"{pkg_ver} does not appear to match x.y.z.")
         config.LOGGER.warning("Comparisons may not work correctly.")
 
-    repos = list_repos()
+    repos = utils.list_repos()
     compare_dependency(repos, pkg_name, utils.Version(pkg_ver))
 
 

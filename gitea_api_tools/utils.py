@@ -1,9 +1,14 @@
+import json
 import re
 from base64 import b64decode
+from typing import List, Tuple
 
 import requests
 
 import config
+
+
+REPOS = List[Tuple[str, str]]
 
 
 def request_get(url: str) -> requests.models.Response:
@@ -38,6 +43,27 @@ def decode(text: str, encoding: str) -> str:
         raise ValueError(f"Unknown encoding {encoding}")
 
     return known_encodings[encoding](text).strip()
+
+
+def list_repos() -> REPOS:
+    """List the repositories on the host.
+
+    Returns:
+        REPOS: list of repositories in the format (owner, repo_name)
+
+    Raises:
+        RuntimeError: no encoding detected in request; request may be invalid
+
+    """
+    url = f"{config.HOST_API}/repos/search?limit={config.SWAGGER_API_LIMIT}"
+    url = f"{url}&archived={config.SEARCH_ARCHIVED_REPOS}"
+    if config.UID:
+        url = f"{url}&uid={config.UID}"
+    response = request_get(url)
+    if not response.encoding:
+        raise RuntimeError(config.NO_ENCODING.format("fetching repos"))
+    repos = json.loads(response.content.decode(response.encoding))['data']
+    return [repo["full_name"].split('/') for repo in repos]
 
 
 class Version:
