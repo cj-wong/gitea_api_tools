@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "gitea-api-tools"
+version = "0.4.0"
+description = ""
+authors = ["CJ Wong <cj-wong@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "gitea_api_tools"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.28.2"
+types-requests = "^2.28.11.14"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.0.0"
+mypy = "^1.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
