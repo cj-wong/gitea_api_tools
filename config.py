@@ -22,11 +22,16 @@ _FH.setLevel(logging.DEBUG)
 _CH = logging.StreamHandler()
 _CH.setLevel(logging.INFO)
 
-_FORMATTER = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+_FH.setFormatter(
+    logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
     )
-_FH.setFormatter(_FORMATTER)
-_CH.setFormatter(_FORMATTER)
+_CH.setFormatter(
+    logging.Formatter(
+        '%(levelname)s - %(message)s'
+        )
+    )
 
 LOGGER.addHandler(_FH)
 LOGGER.addHandler(_CH)
