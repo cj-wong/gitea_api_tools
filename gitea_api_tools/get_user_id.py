@@ -14,7 +14,7 @@ def get_user_id() -> int:
         RuntimeError: could not get encoding
 
     """
-    response = utils.request_get(f"{config.HOST_API}/user")
+    response = utils.get_url(f"{config.HOST_API}/user")
     if response.status_code != 200:
         raise RuntimeError("Could not user information")
     elif not response.encoding:

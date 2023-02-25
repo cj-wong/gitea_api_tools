@@ -11,7 +11,7 @@ import config
 REPOS = List[Tuple[str, str]]
 
 
-def request_get(url: str) -> requests.models.Response:
+def get_url(url: str) -> requests.models.Response:
     """Call requests.get with headers from config."""
     return requests.get(url, headers=config.HEADERS)
 
@@ -31,7 +31,7 @@ def get_repo_file_contents(repo: str, file: str) -> str:
         ValueError: file encoding not available, so file could not be decoded
 
     """
-    response = request_get(f"{repo}/contents/{file}")
+    response = get_url(f"{repo}/contents/{file}")
     if response.status_code != 200:
         raise FileNotFoundError(f"Project does not use {file}")
     elif not response.encoding:
@@ -85,7 +85,7 @@ def list_repos() -> REPOS:
     url = f"{url}&archived={config.SEARCH_ARCHIVED_REPOS}"
     if config.UID:
         url = f"{url}&uid={config.UID}"
-    response = request_get(url)
+    response = get_url(url)
     if not response.encoding:
         raise RuntimeError(config.NO_ENCODING.format("fetching repos"))
     repos = json.loads(response.content.decode(response.encoding))['data']

@@ -69,7 +69,7 @@ def compare_dependency(
     for user, repo in repos:
         u_repo = f"{user}/{repo}"
         current_repo = f"{config.HOST_API}/repos/{u_repo}"
-        response = utils.request_get(f"{current_repo}/languages")
+        response = utils.get_url(f"{current_repo}/languages")
         if not response.encoding:
             config.LOGGER.error(
                 config.NO_ENCODING.format("checking languages"))
