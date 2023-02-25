@@ -1,9 +1,9 @@
 import argparse
 import json
-from typing import List
 
 import config
 import utils
+import utils.python
 
 parser = argparse.ArgumentParser(
     description="Python dependency scanner for Gitea API")
@@ -12,7 +12,8 @@ parser.add_argument("version", type=str, help="package version")
 
 
 def get_outdated_dep_version(
-        dependencies: List[str], p_name: str, p_ver: utils.Version) -> str:
+        dependencies: utils.python.REQUIREMENTS, p_name: str,
+        p_ver: utils.Version) -> str:
     """Get the requirement version, if present.
 
     Args:
@@ -29,26 +30,24 @@ def get_outdated_dep_version(
         utils.MismatchedDependency: version could not be adequately compared
 
     """
-    for dependency in dependencies:
-        try:
-            d_name, d_ver = dependency.split('==')
-        except ValueError as e:
-            raise utils.CouldNotParseDependency from e
-        if d_name != p_name:
-            continue
-        try:
-            if p_ver > utils.Version(d_ver):
-                return d_ver
-        except TypeError:
-            config.LOGGER.warning(f"{p_ver} can't be compared against {d_ver}")
-            raise utils.MismatchedDependency
-        except ValueError:
-            # Implicitly raised by comparison between Versions. Raised when the
-            # number of components don't match between versions.
-            # e.g. x.y.z compared against x.y
-            config.LOGGER.warning(f"{p_ver} can't be compared against {d_ver}")
-            config.LOGGER.warning("The version format may be different.")
-            raise utils.MismatchedDependency
+    if p_name not in dependencies:
+        raise utils.NoDependency
+
+    d_ver = dependencies[p_name]
+
+    try:
+        if p_ver > utils.Version(d_ver):
+            return d_ver
+    except TypeError:
+        config.LOGGER.warning(f"{p_ver} can't be compared against {d_ver}")
+        raise utils.MismatchedDependency
+    except ValueError:
+        # Implicitly raised by comparison between Versions. Raised when the
+        # number of components don't match between versions.
+        # e.g. x.y.z compared against x.y
+        config.LOGGER.warning(f"{p_ver} can't be compared against {d_ver}")
+        config.LOGGER.warning("The version format may be different.")
+        raise utils.MismatchedDependency
 
     raise utils.NoDependency
 
@@ -69,8 +68,8 @@ def compare_dependency(
     outdated = 0
     for user, repo in repos:
         u_repo = f"{user}/{repo}"
-        url = f"{config.HOST_API}/repos/{u_repo}"
-        response = utils.request_get(f"{url}/languages")
+        current_repo = f"{config.HOST_API}/repos/{u_repo}"
+        response = utils.request_get(f"{current_repo}/languages")
         if not response.encoding:
             config.LOGGER.error(
                 config.NO_ENCODING.format("checking languages"))
@@ -80,27 +79,14 @@ def compare_dependency(
         if 'Python' not in langs:
             continue
 
-        response = utils.request_get(f"{url}/contents/requirements.txt")
-        if response.status_code != 200:
-            continue
-        elif not response.encoding:
-            config.LOGGER.error(
-                config.NO_ENCODING.format("getting requirements.txt"))
-            continue
-
-        resp_cont = json.loads(response.content.decode(response.encoding))
-        text = resp_cont['content']
-        encoding = resp_cont['encoding']
-
         try:
-            requirements = utils.decode(text, encoding).split('\n')
-        except ValueError as e:
-            # Unknown encoding
-            raise e
+            requirements = utils.python.process_requirementstxt(current_repo)
+        except ValueError:
+            pass
 
         try:
             dep_ver = get_outdated_dep_version(requirements, p_name, p_ver)
-        except utils.NoDependency:
+        except (NameError, utils.NoDependency):
             continue
         except utils.MismatchedDependency:
             config.LOGGER.warning("Encountered an error matching deps")

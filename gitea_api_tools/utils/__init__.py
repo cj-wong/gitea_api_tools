@@ -16,6 +16,32 @@ def request_get(url: str) -> requests.models.Response:
     return requests.get(url, headers=config.HEADERS)
 
 
+def get_repo_file_contents(repo: str, file: str) -> str:
+    """Get a file from a repository.
+
+    Args:
+        repo: repository
+        file: file that may belong to the repository; if not, raises exceptions
+
+    Returns:
+        str: contents of file in repo
+
+    Raises:
+        FileNotFoundError: file doesn't exist
+        ValueError: file encoding not available, so file could not be decoded
+
+    """
+    response = request_get(f"{repo}/contents/{file}")
+    if response.status_code != 200:
+        raise FileNotFoundError(f"Project does not use {file}")
+    elif not response.encoding:
+        config.LOGGER.error(
+            config.NO_ENCODING.format(f"getting {file}"))
+        raise ValueError("Could not decode file")
+
+    return response.content.decode(response.encoding)
+
+
 def decode(text: str, encoding: str) -> str:
     """Decode provided text with its encoding.
 
