@@ -96,6 +96,27 @@ def list_repos() -> REPOS:
     return [repo["full_name"].split('/') for repo in repos]
 
 
+def is_repo_using_language(repo: str, language: str) -> bool:
+    """Check whether a repository is using a certain programming language.
+
+    Args:
+        repo: repository
+        language: programming language
+
+    Returns:
+        bool: True if the repository is using the language; False otherwise
+
+    """
+    response = get_url(f"{repo}/languages")
+    if not response.encoding:
+        config.LOGGER.error(
+            config.NO_ENCODING.format("checking languages"))
+        return False
+
+    langs = json.loads(response.content.decode(response.encoding))
+    return language in langs
+
+
 class Version:
     """Defines a version.
 
