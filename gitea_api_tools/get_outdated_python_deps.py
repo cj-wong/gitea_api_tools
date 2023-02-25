@@ -80,13 +80,14 @@ def compare_dependency(
             continue
 
         try:
-            requirements = utils.python.process_requirementstxt(current_repo)
+            requirements = utils.python.process_requirements(current_repo)
         except ValueError:
-            pass
+            # Silently ignore missing requirements
+            continue
 
         try:
             dep_ver = get_outdated_dep_version(requirements, p_name, p_ver)
-        except (NameError, utils.NoDependency):
+        except utils.NoDependency:
             continue
         except (utils.MismatchedDependency, utils.CouldNotParseDependency):
             config.LOGGER.warning("Encountered an error matching deps")

@@ -33,18 +33,15 @@ def search_repos_for_dep(dependency: str) -> None:
             continue
 
         try:
-            requirements = utils.python.process_requirementstxt(current_repo)
+            requirements = utils.python.process_requirements(current_repo)
         except ValueError:
-            pass
-
-        try:
-            # Silently ignore repositories that don't have the dependency
-            if dependency in requirements:
-                version = requirements[dependency]
-                config.LOGGER.info(f"{u_repo}: {version}")
-        except NameError:
             # Silently ignore missing requirements
-            pass
+            continue
+
+        # Silently ignore repositories that don't have the dependency
+        if dependency in requirements:
+            version = requirements[dependency]
+            config.LOGGER.info(f"{u_repo}: {version}")
 
 
 def main() -> None:
