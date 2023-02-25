@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.4.0] - 2023-02-25
+### Added
+- Added `get_python_dep_repos`, a script to find all repositories that use a provided dependency. It is a more general script than `get_outdated_python_deps`.
+- Added `get_deploy_keys`, a script to view all deploy keys in use along with their public keys and repositories in use.
+
+### Changed
+- This project is now managed by `asdf-vm`, `direnv`, and `poetry`.
+- Moved project scripts and configuration to `gitea_api_tools`.
+- `scan_python_deps` was renamed `get_outdated_python_deps`.
+- Made `utils` a sub-module.
+
 ## [0.3.0] - 2023-02-15
 ### Added
 - Added a new script `get_user_id.py` for retrieving and optionally storing the user's ID.
