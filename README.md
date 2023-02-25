@@ -27,6 +27,4 @@ Copy `config.json.example` and make `config.json`, filling in the values.
 
 This project is not affiliated with or endorsed by [Gitea]. See [LICENSE](LICENSE) for more detail.
 
-Additionally, currently only `requirements.txt` is supported. In the future, I may expand functionality to other means of managing dependencies.
-
 [Gitea]: https://gitea.io/
