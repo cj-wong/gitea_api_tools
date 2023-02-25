@@ -88,12 +88,8 @@ def compare_dependency(
             dep_ver = get_outdated_dep_version(requirements, p_name, p_ver)
         except (NameError, utils.NoDependency):
             continue
-        except utils.MismatchedDependency:
+        except (utils.MismatchedDependency, utils.CouldNotParseDependency):
             config.LOGGER.warning("Encountered an error matching deps")
-            config.LOGGER.warning(f"The affected repository is {u_repo}")
-            continue
-        except utils.CouldNotParseDependency:
-            config.LOGGER.warning("Encountered an error parsing deps")
             config.LOGGER.warning(f"The affected repository is {u_repo}")
             continue
         else:
