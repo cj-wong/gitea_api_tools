@@ -39,7 +39,11 @@ def get_repo_file_contents(repo: str, file: str) -> str:
             config.NO_ENCODING.format(f"getting {file}"))
         raise ValueError("Could not decode file")
 
-    return response.content.decode(response.encoding)
+    contents = response.content.decode(response.encoding).strip()
+    if not json.loads(contents):
+        raise ValueError("Empty file")
+
+    return contents
 
 
 def decode(text: str, encoding: str) -> str:
