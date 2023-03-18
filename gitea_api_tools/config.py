@@ -55,7 +55,7 @@ EXIT_NO_ARGS = 10
 
 try:
     with open('config.json') as _f:
-        CONF = json.load(_f)
+        config = json.load(_f)
 except _CONFIG_LOAD_ERRORS as e:
     logger.error("config.json doesn't exist or is malformed.")
     logger.error(f'More information: {e}')
@@ -64,41 +64,38 @@ except _CONFIG_LOAD_ERRORS as e:
 with open('config.json.example') as _f:
     _DEFAULTS = json.load(_f)
 
-TOKEN = CONF['token']
-HOST = CONF['host']
-
 
 def validate_configuration() -> None:
     """Validate the configuration."""
     exit = 0
 
     required_fields = {"host", "token", "search_archived_repos"}
-    fields = set(CONF.keys())
+    fields = set(config.keys())
 
-    if _DEFAULTS == CONF:
+    if _DEFAULTS == config:
         logger.error(
             "config.json has default values. Modify them with your own.")
         exit = EXIT_CONFIG_DEFAULT
     elif not required_fields.issubset(fields):
         logger.error("config.json is missing required fields.")
         exit = EXIT_CONFIG_MISSING_REQUIRED
-    elif not TOKEN or not HOST:
+    elif not config['token'] or not config['host']:
         logger.error('"token" and "host" are required fields for config.json.')
         exit = EXIT_CONFIG_EMPTY_VALUE
-    elif TOKEN == _DEFAULTS['token']:
+    elif config['token'] == _DEFAULTS['token']:
         logger.error('Enter your own token under "token".')
         logger.error("Reference: https://docs.gitea.io/en-us/api-usage/")
         exit = EXIT_CONFIG_DEFAULT_VALUES
-    elif HOST == _DEFAULTS['host']:
+    elif config['host'] == _DEFAULTS['host']:
         logger.error('Enter your own Gitea instance under "host".')
         exit = EXIT_CONFIG_DEFAULT_VALUES
-    elif 'uid' in CONF:
-        if type(CONF['uid']) is not int and not CONF['uid'].isnum():
+    elif 'uid' in config:
+        if type(config['uid']) is not int and not config['uid'].isnum():
             logger.error('User IDs ("uid") are strictly numbers and optional.')
             logger.error('If not used, delete the key-value pair for "uid".')
             exit = EXIT_CONFIG_DEFAULT_VALUES
-    elif 'uid' not in CONF:
-        CONF['uid'] = 0
+    elif 'uid' not in config:
+        config['uid'] = 0
 
     if exit:
         sys.exit(exit)
@@ -109,7 +106,7 @@ def write_config() -> None:
     validate_configuration()
 
     with open('config.json', 'w') as f:
-        json.dump(CONF, fp=f, indent=4)
+        json.dump(config, fp=f, indent=4)
 
     with open('config.json', 'a') as f:
         f.write('\n')
@@ -119,13 +116,13 @@ validate_configuration()
 
 # Post-validation variables
 
-UID = int(CONF['uid'])
-HOST_API = f"{HOST}/api/v1"
+UID = int(config['uid'])
+HOST_API = f"{config['host']}/api/v1"
 HEADERS = {
-    "Authorization": f"token {TOKEN}",
+    "Authorization": f"token {config['token']}",
     "Accept": "application/json",
     }
-SEARCH_ARCHIVED_REPOS = bool(CONF['search_archived_repos'])
+SEARCH_ARCHIVED_REPOS = bool(config['search_archived_repos'])
 
 # Other configuration
 

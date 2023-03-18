@@ -31,7 +31,7 @@ def main() -> None:
     config.logger.info(f"Your user ID is {user_id}.")
     choice = input("Would you like to store this in the configuration? [yN] ")
     if choice.lower().startswith('y'):
-        config.CONF['uid'] = user_id
+        config.config['uid'] = user_id
         config.write_config()
         config.logger.info("User ID was stored in config.json.")
     else:

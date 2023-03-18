@@ -2,7 +2,6 @@ import argparse
 
 from . import config
 from . import utils
-# from .utils import python
 
 
 parser = argparse.ArgumentParser(
