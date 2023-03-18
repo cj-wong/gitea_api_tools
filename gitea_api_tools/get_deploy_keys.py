@@ -2,8 +2,8 @@ import json
 from collections import defaultdict
 from typing import Dict, List, Tuple
 
-import config
-import utils
+from . import config
+from . import utils
 
 
 REPO_KEYS = Dict[Tuple[str, str], List[str]]
@@ -24,7 +24,7 @@ def print_key_repos(repo_keys: REPO_KEYS) -> None:
     """
     for (fingerprint, pubkey), repos in repo_keys.items():
         s_repos = '\n- '.join(repos)
-        config.LOGGER.info(KEY_MESSAGE.format(pubkey, fingerprint, s_repos))
+        config.logger.info(KEY_MESSAGE.format(pubkey, fingerprint, s_repos))
 
 
 def main() -> None:
@@ -38,10 +38,10 @@ def main() -> None:
         current_repo_keys = f"{config.HOST_API}/repos/{u_repo}/keys"
         response = utils.get_url(current_repo_keys)
         if response.status_code != 200:
-            config.LOGGER.warning(f"Could not access keys for {u_repo}")
+            config.logger.warning(f"Could not access keys for {u_repo}")
             continue
         elif not response.encoding:
-            config.LOGGER.error(
+            config.logger.error(
                 config.NO_ENCODING.format("getting deploy keys"))
             raise ValueError("Could not decode file")
 
@@ -49,7 +49,7 @@ def main() -> None:
         keys = json.loads(contents)
         for key in keys:
             if type(key) is not dict:
-                config.LOGGER.warning(f"{u_repo} response was not a dict/JSON")
+                config.logger.warning(f"{u_repo} response was not a dict/JSON")
                 continue
             fingerprint = key["fingerprint"]
             try:

@@ -5,8 +5,11 @@ from typing import List, Tuple
 
 import requests
 
-import config
+from .. import config
+from . import python
 
+
+__all__ = ["python"]
 
 REPOS = List[Tuple[str, str]]
 
@@ -35,7 +38,7 @@ def get_repo_file_contents(repo: str, file: str) -> str:
     if response.status_code != 200:
         raise FileNotFoundError(f"Project does not use {file}")
     elif not response.encoding:
-        config.LOGGER.error(
+        config.logger.error(
             config.NO_ENCODING.format(f"getting {file}"))
         raise ValueError("Could not decode file")
 
@@ -109,7 +112,7 @@ def is_repo_using_language(repo: str, language: str) -> bool:
     """
     response = get_url(f"{repo}/languages")
     if not response.encoding:
-        config.LOGGER.error(
+        config.logger.error(
             config.NO_ENCODING.format("checking languages"))
         return False
 

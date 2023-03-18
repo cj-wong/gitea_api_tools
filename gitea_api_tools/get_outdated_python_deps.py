@@ -1,8 +1,8 @@
 import argparse
 
-import config
-import utils
-import utils.python
+from . import config
+from . import utils
+
 
 parser = argparse.ArgumentParser(
     description="Python dependency scanner for Gitea API")
@@ -38,14 +38,14 @@ def get_outdated_dep_version(
         if p_ver > utils.Version(d_ver):
             return d_ver
     except TypeError:
-        config.LOGGER.warning(f"{p_ver} can't be compared against {d_ver}")
+        config.logger.warning(f"{p_ver} can't be compared against {d_ver}")
         raise utils.MismatchedDependency
     except ValueError:
         # Implicitly raised by comparison between Versions. Raised when the
         # number of components don't match between versions.
         # e.g. x.y.z compared against x.y
-        config.LOGGER.warning(f"{p_ver} can't be compared against {d_ver}")
-        config.LOGGER.warning("The version format may be different.")
+        config.logger.warning(f"{p_ver} can't be compared against {d_ver}")
+        config.logger.warning("The version format may be different.")
         raise utils.MismatchedDependency
 
     raise utils.NoDependency
@@ -82,15 +82,15 @@ def compare_dependency(
         except utils.NoDependency:
             continue
         except (utils.MismatchedDependency, utils.CouldNotParseDependency):
-            config.LOGGER.warning("Encountered an error matching deps")
-            config.LOGGER.warning(f"The affected repository is {u_repo}")
+            config.logger.warning("Encountered an error matching deps")
+            config.logger.warning(f"The affected repository is {u_repo}")
             continue
         else:
-            config.LOGGER.info(f"{u_repo} is outdated: {dep_ver}")
+            config.logger.info(f"{u_repo} is outdated: {dep_ver}")
             outdated += 1
 
     if not outdated:
-        config.LOGGER.info("No packages are affected")
+        config.logger.info("No packages are affected")
 
 
 def main() -> None:
@@ -99,8 +99,8 @@ def main() -> None:
     pkg_name = args.package
     pkg_ver = args.version
     if not config.PACKAGE_VERSION.match(pkg_ver):
-        config.LOGGER.warning(f"{pkg_ver} does not appear to match x.y.z.")
-        config.LOGGER.warning("Comparisons may not work correctly.")
+        config.logger.warning(f"{pkg_ver} does not appear to match x.y.z.")
+        config.logger.warning("Comparisons may not work correctly.")
 
     repos = utils.list_repos()
     compare_dependency(repos, pkg_name, utils.Version(pkg_ver))

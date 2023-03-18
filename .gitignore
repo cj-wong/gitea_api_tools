@@ -10,3 +10,4 @@ __pycache__
 *.log
 *.log.*
 config.json
+config.json.example

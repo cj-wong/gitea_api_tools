@@ -7,13 +7,13 @@ import sys
 
 # Logger related
 
-_LOGGER_NAME = 'gitea_scanner'
+_LOG_NAME = 'gitea-api-tools'
 
-LOGGER = logging.getLogger(_LOGGER_NAME)
-LOGGER.setLevel(logging.DEBUG)
+logger = logging.getLogger(_LOG_NAME)
+logger.setLevel(logging.DEBUG)
 
 _FH = logging.handlers.RotatingFileHandler(
-    f'{_LOGGER_NAME}.log',
+    f'{_LOG_NAME}.log',
     maxBytes=40960,
     backupCount=5,
     )
@@ -33,8 +33,8 @@ _CH.setFormatter(
         )
     )
 
-LOGGER.addHandler(_FH)
-LOGGER.addHandler(_CH)
+logger.addHandler(_FH)
+logger.addHandler(_CH)
 
 # Configuration file reading and validating
 
@@ -57,8 +57,8 @@ try:
     with open('config.json') as _f:
         CONF = json.load(_f)
 except _CONFIG_LOAD_ERRORS as e:
-    LOGGER.error("config.json doesn't exist or is malformed.")
-    LOGGER.error(f'More information: {e}')
+    logger.error("config.json doesn't exist or is malformed.")
+    logger.error(f'More information: {e}')
     sys.exit(EXIT_CONFIG_INVALID)
 
 with open('config.json.example') as _f:
@@ -76,26 +76,26 @@ def validate_configuration() -> None:
     fields = set(CONF.keys())
 
     if _DEFAULTS == CONF:
-        LOGGER.error(
+        logger.error(
             "config.json has default values. Modify them with your own.")
         exit = EXIT_CONFIG_DEFAULT
     elif not required_fields.issubset(fields):
-        LOGGER.error("config.json is missing required fields.")
+        logger.error("config.json is missing required fields.")
         exit = EXIT_CONFIG_MISSING_REQUIRED
     elif not TOKEN or not HOST:
-        LOGGER.error('"token" and "host" are required fields for config.json.')
+        logger.error('"token" and "host" are required fields for config.json.')
         exit = EXIT_CONFIG_EMPTY_VALUE
     elif TOKEN == _DEFAULTS['token']:
-        LOGGER.error('Enter your own token under "token".')
-        LOGGER.error("Reference: https://docs.gitea.io/en-us/api-usage/")
+        logger.error('Enter your own token under "token".')
+        logger.error("Reference: https://docs.gitea.io/en-us/api-usage/")
         exit = EXIT_CONFIG_DEFAULT_VALUES
     elif HOST == _DEFAULTS['host']:
-        LOGGER.error('Enter your own Gitea instance under "host".')
+        logger.error('Enter your own Gitea instance under "host".')
         exit = EXIT_CONFIG_DEFAULT_VALUES
     elif 'uid' in CONF:
         if type(CONF['uid']) is not int and not CONF['uid'].isnum():
-            LOGGER.error('User IDs ("uid") are strictly numbers and optional.')
-            LOGGER.error('If not used, delete the key-value pair for "uid".')
+            logger.error('User IDs ("uid") are strictly numbers and optional.')
+            logger.error('If not used, delete the key-value pair for "uid".')
             exit = EXIT_CONFIG_DEFAULT_VALUES
     elif 'uid' not in CONF:
         CONF['uid'] = 0

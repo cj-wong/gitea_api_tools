@@ -1,8 +1,8 @@
 import argparse
 
-import config
-import utils
-import utils.python
+from . import config
+from . import utils
+# from .utils import python
 
 
 parser = argparse.ArgumentParser(
@@ -33,7 +33,7 @@ def search_repos_for_dep(dependency: str) -> None:
         # Silently ignore repositories that don't have the dependency
         if dependency in requirements:
             version = requirements[dependency]
-            config.LOGGER.info(f"{u_repo}: {version}")
+            config.logger.info(f"{u_repo}: {version}")
 
 
 def main() -> None:

@@ -2,7 +2,8 @@ import json
 import tomllib
 from typing import Dict
 
-import utils
+from .. import utils
+
 
 PACKAGE = str
 VERSION = str
