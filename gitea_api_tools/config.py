@@ -1,40 +1,107 @@
 import json
 import logging
 import logging.handlers
+import os
 import re
 import sys
+from pathlib import Path
+from typing import Tuple
+
+
+_PROJECT_NAME = 'gitea-api-tools'
+
+
+def get_os_dirs() -> Tuple[Path, Path]:
+    """Get directories corresponding to OS configuration/cache.
+
+    Returns:
+        Tuple[Path, Path]:
+
+            1.  configuration directory; on Linux, it'd be XDG_CONFIG_HOME
+            2.  cache/data directory; on Linux, it can be XDG_STATE_HOME
+
+    Raises:
+        RuntimeError: for one of two reasons:
+
+            1.  OS is not supported. Currently, only Linux (and by extension,
+                cygwin) and Windows are supported.
+            2.  Windows was detected but it's missing a critical environment
+                variable: LocalAppData.
+
+    """
+    win32_err = (
+        "Your OS reported itself as Windows but"
+        " it's missing environment variables")
+    if sys.platform.startswith("linux") or sys.platform.startswith("cygwin"):
+        config_root = Path(
+            os.environ.get('XDG_CONFIG_HOME', '~/.config')).expanduser()
+        config_dir = config_root / _PROJECT_NAME
+        config_dir.mkdir(parents=True, exist_ok=True)
+        cache_root = Path(
+            os.environ.get('XDG_STATE_HOME', '~/.local/state')).expanduser()
+        cache_dir = cache_root / _PROJECT_NAME
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        return (config_dir, cache_dir)
+    elif sys.platform.startswith("win32"):
+        try:
+            data_root = Path(os.environ.get('LOCALAPPDATA'))
+        except TypeError as e:
+            raise RuntimeError(win32_err) from e
+        data_dir = data_root / _PROJECT_NAME
+        data_dir.mkdir(parents=True, exist_ok=True)
+        return (data_dir, data_dir)
+
+    raise RuntimeError("This project does not support your operating system")
 
 
 # Logger related
 
-_LOG_NAME = 'gitea-api-tools'
 
-logger = logging.getLogger(_LOG_NAME)
-logger.setLevel(logging.DEBUG)
+def create_logger(cache_dir: Path) -> logging.Logger:
+    """Create logger into the cache directory.
 
-_FH = logging.handlers.RotatingFileHandler(
-    f'{_LOG_NAME}.log',
-    maxBytes=40960,
-    backupCount=5,
-    )
-_FH.setLevel(logging.DEBUG)
+    Args:
+        cache_dir: the path to the cache directory for logging
 
-_CH = logging.StreamHandler()
-_CH.setLevel(logging.INFO)
+    Returns:
+        logging.Logger: the logger
 
-_FH.setFormatter(
-    logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    """
+    log_file = cache_dir / f'{_PROJECT_NAME}.log'
+    max_log_size = 40960
+    max_log_files = 5
+
+    logger = logging.getLogger(_PROJECT_NAME)
+    logger.setLevel(logging.DEBUG)
+
+    file_handler = logging.handlers.RotatingFileHandler(
+        log_file,
+        maxBytes=max_log_size,
+        backupCount=max_log_files,
         )
-    )
-_CH.setFormatter(
-    logging.Formatter(
-        '%(levelname)s - %(message)s'
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(
+        logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            )
         )
-    )
 
-logger.addHandler(_FH)
-logger.addHandler(_CH)
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(
+        logging.Formatter(
+            '%(levelname)s - %(message)s'
+            )
+        )
+
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+    return logger
+
+
+config_dir, cache_dir = get_os_dirs()
+logger = create_logger(cache_dir)
 
 # Configuration file reading and validating
 
