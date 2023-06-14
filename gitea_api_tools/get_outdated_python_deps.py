@@ -1,9 +1,8 @@
 import argparse
 
 from . import config
-from . import utils
-
-from .utils import python as u_python
+from . import gitea
+from . import language
 
 
 parser = argparse.ArgumentParser(
@@ -13,8 +12,8 @@ parser.add_argument("version", type=str, help="package version")
 
 
 def get_outdated_dep_version(
-        dependencies: u_python.REQUIREMENTS, p_name: str,
-        p_ver: utils.Version) -> str:
+        dependencies: language.python.REQUIREMENTS, p_name: str,
+        p_ver: gitea.Version) -> str:
     """Get the requirement version, if present.
 
     Args:
@@ -26,35 +25,35 @@ def get_outdated_dep_version(
         str: the version of the outdated package
 
     Raises:
-        utils.CouldNotParseDependency: dependency format could not be parsed
-        utils.NoDedendency: package was not found in this project
-        utils.MismatchedDependency: version could not be adequately compared
+        gitea.CouldNotParseDependency: dependency format could not be parsed
+        gitea.NoDedendency: package was not found in this project
+        gitea.MismatchedDependency: version could not be adequately compared
 
     """
     if p_name not in dependencies:
-        raise utils.NoDependency
+        raise gitea.NoDependency
 
     d_ver = dependencies[p_name]
 
     try:
-        if p_ver > utils.Version(d_ver):
+        if p_ver > gitea.Version(d_ver):
             return d_ver
     except TypeError:
         config.logger.warning(f"{p_ver} can't be compared against {d_ver}")
-        raise utils.MismatchedDependency
+        raise gitea.MismatchedDependency
     except ValueError:
         # Implicitly raised by comparison between Versions. Raised when the
         # number of components don't match between versions.
         # e.g. x.y.z compared against x.y
         config.logger.warning(f"{p_ver} can't be compared against {d_ver}")
         config.logger.warning("The version format may be different.")
-        raise utils.MismatchedDependency
+        raise gitea.MismatchedDependency
 
-    raise utils.NoDependency
+    raise gitea.NoDependency
 
 
 def compare_dependency(
-        repos: utils.REPOS, p_name: str, p_ver: utils.Version) -> None:
+        repos: gitea.REPOS, p_name: str, p_ver: gitea.Version) -> None:
     """Compare dependency against Python-only repositories.
 
     Args:
@@ -70,20 +69,20 @@ def compare_dependency(
     for user, repo in repos:
         u_repo = f"{user}/{repo}"
         current_repo = f"{config.config.host_api}/repos/{u_repo}"
-        if not utils.is_repo_using_language(current_repo, 'Python'):
+        if not gitea.is_repo_using_language(current_repo, 'Python'):
             continue
 
         try:
-            requirements = u_python.process_requirements(current_repo)
+            requirements = language.python.process_requirements(current_repo)
         except ValueError:
             # Silently ignore missing requirements
             continue
 
         try:
             dep_ver = get_outdated_dep_version(requirements, p_name, p_ver)
-        except utils.NoDependency:
+        except gitea.NoDependency:
             continue
-        except (utils.MismatchedDependency, utils.CouldNotParseDependency):
+        except (gitea.MismatchedDependency, gitea.CouldNotParseDependency):
             config.logger.warning("Encountered an error matching deps")
             config.logger.warning(f"The affected repository is {u_repo}")
             continue
@@ -100,12 +99,12 @@ def main() -> None:
     args = parser.parse_args()
     pkg_name = args.package
     pkg_ver = args.version
-    if not u_python.PACKAGE_VERSION.match(pkg_ver):
+    if not language.python.PACKAGE_VERSION.match(pkg_ver):
         config.logger.warning(f"{pkg_ver} does not appear to match x.y.z.")
         config.logger.warning("Comparisons may not work correctly.")
 
-    repos = utils.list_repos()
-    compare_dependency(repos, pkg_name, utils.Version(pkg_ver))
+    repos = gitea.list_repos()
+    compare_dependency(repos, pkg_name, gitea.Version(pkg_ver))
 
 
 if __name__ == '__main__':

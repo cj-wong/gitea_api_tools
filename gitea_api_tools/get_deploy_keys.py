@@ -3,7 +3,7 @@ from collections import defaultdict
 from typing import Dict, List, Tuple
 
 from . import config
-from . import utils
+from . import gitea
 
 
 REPO_KEYS = Dict[Tuple[str, str], List[str]]
@@ -32,17 +32,17 @@ def main() -> None:
     repo_keys: REPO_KEYS = defaultdict(list)
     pubkey_words = 2
 
-    repos = utils.list_repos()
+    repos = gitea.list_repos()
     for user, repo in repos:
         u_repo = f"{user}/{repo}"
         current_repo_keys = f"{config.config.host_api}/repos/{u_repo}/keys"
-        response = utils.get_url(current_repo_keys)
+        response = gitea.get_url(current_repo_keys)
         if response.status_code != 200:
             config.logger.warning(f"Could not access keys for {u_repo}")
             continue
         elif not response.encoding:
             config.logger.error(
-                utils.NO_ENCODING.format("getting deploy keys"))
+                gitea.NO_ENCODING.format("getting deploy keys"))
             raise ValueError("Could not decode file")
 
         contents = response.content.decode(response.encoding).strip()

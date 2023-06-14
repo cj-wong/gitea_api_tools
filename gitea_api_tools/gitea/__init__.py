@@ -6,10 +6,7 @@ from typing import List, Tuple
 import requests
 
 from .. import config
-from . import python
 
-
-__all__ = ["python"]
 
 REPOS = List[Tuple[str, str]]
 NO_ENCODING = "No encoding was detected when {}"

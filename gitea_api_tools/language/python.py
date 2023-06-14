@@ -3,7 +3,7 @@ import re
 import tomllib
 from typing import Dict
 
-from .. import utils
+from .. import gitea
 
 
 PACKAGE = str
@@ -28,7 +28,7 @@ def process_requirementstxt(repo: str) -> REQUIREMENTS:
 
     """
     try:
-        file_contents = utils.get_repo_file_contents(repo, 'requirements.txt')
+        file_contents = gitea.get_repo_file_contents(repo, 'requirements.txt')
     except (FileNotFoundError, ValueError) as e:
         raise ValueError("File could not be read") from e
 
@@ -37,7 +37,7 @@ def process_requirementstxt(repo: str) -> REQUIREMENTS:
     encoding = resp_cont['encoding']
 
     try:
-        contents = utils.decode(text, encoding)
+        contents = gitea.decode(text, encoding)
     except ValueError as e:
         # Unknown encoding
         raise e
@@ -48,7 +48,7 @@ def process_requirementstxt(repo: str) -> REQUIREMENTS:
         try:
             package, version = req.split('==')
         except ValueError as e:
-            raise utils.CouldNotParseDependency from e
+            raise gitea.CouldNotParseDependency from e
         requirements[package] = version
 
     return requirements
@@ -73,7 +73,7 @@ def process_poetrylock(repo: str) -> REQUIREMENTS:
 
     """
     try:
-        file_contents = utils.get_repo_file_contents(repo, 'poetry.lock')
+        file_contents = gitea.get_repo_file_contents(repo, 'poetry.lock')
     except (FileNotFoundError, ValueError) as e:
         raise ValueError("File could not be read") from e
 
@@ -82,7 +82,7 @@ def process_poetrylock(repo: str) -> REQUIREMENTS:
     encoding = resp_cont['encoding']
 
     try:
-        contents = utils.decode(text, encoding)
+        contents = gitea.decode(text, encoding)
     except ValueError as e:
         # Unknown encoding
         raise e
@@ -128,7 +128,7 @@ def process_requirements(repo: str) -> REQUIREMENTS:
 
     try:
         return process_requirementstxt(repo)
-    except (ValueError, utils.CouldNotParseDependency):
+    except (ValueError, gitea.CouldNotParseDependency):
         pass
 
     raise ValueError("Could not process any requirements at all.")
