@@ -3,6 +3,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.0] - 2023-06-14
+### Added
+- Added support for OS-dependent configuration directories. For Linux (and most likely Cygwin), XDG directories are supported. For Windows, approximate analogs are used. MacOS is currently unsupported, as I have no idea which directories apply.
+
+### Changed
+- Configuration is now strictly in the OS-dependent configuration directories as listed above.
+- The user configuration is now represented as an object (`config.Config`), simplifying validation and writing/saving.
+- Script modules were moved to more descriptive names:
+    - `gitea` contains all Gitea-related functionality.
+    - `language` contains programming language-specific functions for Gitea.
+    - `package.py` is all about packages (formerly dependencies).
+- All instances of "dependencies" in the new `package.py` were replaced with "packages".
+
 ## [0.4.0] - 2023-02-25
 ### Added
 - Added `get_python_dep_repos`, a script to find all repositories that use a provided dependency. It is a more general script than `get_outdated_python_deps`.
