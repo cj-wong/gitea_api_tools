@@ -121,6 +121,7 @@ class Config:
     # _ok_same_value is a list of keys in which values can be the same
     # between the user and sample configurations.
     _ok_same_value = [
+        "uid",
         "search_archived_repos",
         ]
 
