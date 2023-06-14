@@ -63,6 +63,12 @@ def process_poetrylock(repo: str) -> REQUIREMENTS:
     Returns:
         REQUIREMENTS: dictionary of packages to versions
 
+    Raises:
+        ValueError: one of several reasons:
+
+            1. remote file not found (repository may not use poetry)
+            2. unknown decoding from remote poetry.lock
+
     """
     try:
         file_contents = utils.get_repo_file_contents(repo, 'poetry.lock')
@@ -109,6 +115,9 @@ def process_requirements(repo: str) -> REQUIREMENTS:
     Returns:
         REQUIREMENTS: dictionary of packages to versions
 
+    Raises:
+        ValueError: no requirements could be parsed
+
     """
     try:
         return process_poetrylock(repo)
@@ -117,7 +126,7 @@ def process_requirements(repo: str) -> REQUIREMENTS:
 
     try:
         return process_requirementstxt(repo)
-    except ValueError:
+    except (ValueError, utils.CouldNotParseDependency):
         pass
 
     raise ValueError("Could not process any requirements at all.")
