@@ -4,6 +4,7 @@ import tomllib
 from typing import Dict
 
 from .. import gitea
+from .. import package
 
 
 PACKAGE = str
@@ -46,10 +47,10 @@ def process_requirementstxt(repo: str) -> REQUIREMENTS:
 
     for req in contents.split('\n'):
         try:
-            package, version = req.split('==')
+            pkg, version = req.split('==')
         except ValueError as e:
-            raise gitea.CouldNotParseDependency from e
-        requirements[package] = version
+            raise package.CouldNotParse from e
+        requirements[pkg] = version
 
     return requirements
 
@@ -128,7 +129,7 @@ def process_requirements(repo: str) -> REQUIREMENTS:
 
     try:
         return process_requirementstxt(repo)
-    except (ValueError, gitea.CouldNotParseDependency):
+    except (ValueError, package.CouldNotParse):
         pass
 
     raise ValueError("Could not process any requirements at all.")
