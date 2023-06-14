@@ -1,5 +1,6 @@
 import json
 import re
+import time
 from base64 import b64decode
 from typing import List, Tuple
 
@@ -90,21 +91,29 @@ def list_repos() -> REPOS:
     except AttributeError as e:
         raise RuntimeError("Configuration is malformed") from e
 
-    url_parts = [
-        f"{config.config.host_api}/repos/search",
-        f"?limit={config.SWAGGER_API_LIMIT}",
-        f"&archived={search_archived_repos}",
-        ]
+    url = f"{config.config.host_api}/repos/search"
+    url = f"{url}?archived={search_archived_repos}"
 
     uid = getattr(config.config, 'uid', None)
     if uid:
-        url_parts.append(f"&uid={uid}")
+        url = f"{url}&uid={uid}"
 
-    response = get_url(''.join(url_parts))
-    if not response.encoding:
-        raise RuntimeError(NO_ENCODING.format("fetching repos"))
-    repos = json.loads(response.content.decode(response.encoding))['data']
-    return [repo["full_name"].split('/') for repo in repos]
+    page = 0
+    repos_left = True
+    all_repos = []
+    while repos_left:
+        page += 1
+        paged_url = f"{url}&page={page}"
+        response = get_url(paged_url)
+        if not response.encoding:
+            raise RuntimeError(NO_ENCODING.format("fetching repos"))
+        repos = json.loads(response.content.decode(response.encoding))['data']
+        if repos:
+            all_repos.extend(repos)
+            time.sleep(1)
+        else:
+            repos_left = False
+    return [repo["full_name"].split('/') for repo in all_repos]
 
 
 def is_repo_using_language(repo: str, language: str) -> bool:

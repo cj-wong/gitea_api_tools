@@ -206,5 +206,3 @@ HEADERS = {
     }
 
 # Other configuration
-
-SWAGGER_API_LIMIT = 999_999_999
