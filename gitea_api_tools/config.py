@@ -4,10 +4,11 @@ import logging.handlers
 import os
 import sys
 from pathlib import Path
-from typing import Tuple
+from typing import Dict, Tuple
 
 
 _PROJECT_NAME = 'gitea-api-tools'
+_CONFIG = Dict[str, str | int]
 
 
 def get_os_dirs() -> Tuple[Path, Path]:
@@ -158,19 +159,32 @@ class Config:
 
         """
         for key in _example.keys:
-            ex_val = getattr(self, key)
+            user_val = getattr(self, key)
 
             try:
-                user_val = getattr(_example, key)
+                ex_val = getattr(_example, key)
             except AttributeError:
                 return False
             except NameError:
                 raise RuntimeError("The example configuration was not found")
 
-            if ex_val == user_val and key not in self._ok_same_value:
+            if user_val == ex_val and key not in self._ok_same_value:
                 return False
 
         return True
+
+    def convert_to_dict(self) -> _CONFIG:
+        """Convert the configuration back into a dictionary.
+
+        Returns:
+            _CONFIG: a dictionary equivalent to config.json
+
+        """
+        as_dict: _CONFIG = {}
+        for key in _example.keys:
+            as_dict[key] = getattr(self, key)
+
+        return as_dict
 
     def write_config(self) -> None:
         """Write (valid) configuration back to file.
@@ -182,8 +196,10 @@ class Config:
         if not self.validate():
             raise RuntimeError("Could not validate configuration")
 
+        as_dict = self.convert_to_dict()
+
         with self.file.open('w') as f:
-            json.dump(config, fp=f, indent=4)
+            json.dump(as_dict, fp=f, indent=4)
 
         with self.file.open('a') as f:
             f.write('\n')
