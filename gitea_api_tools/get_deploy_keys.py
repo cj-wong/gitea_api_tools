@@ -35,14 +35,14 @@ def main() -> None:
     repos = utils.list_repos()
     for user, repo in repos:
         u_repo = f"{user}/{repo}"
-        current_repo_keys = f"{config.HOST_API}/repos/{u_repo}/keys"
+        current_repo_keys = f"{config.config.host_api}/repos/{u_repo}/keys"
         response = utils.get_url(current_repo_keys)
         if response.status_code != 200:
             config.logger.warning(f"Could not access keys for {u_repo}")
             continue
         elif not response.encoding:
             config.logger.error(
-                config.NO_ENCODING.format("getting deploy keys"))
+                utils.NO_ENCODING.format("getting deploy keys"))
             raise ValueError("Could not decode file")
 
         contents = response.content.decode(response.encoding).strip()

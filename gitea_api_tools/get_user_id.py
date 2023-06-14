@@ -14,11 +14,12 @@ def get_user_id() -> int:
         RuntimeError: could not get encoding
 
     """
-    response = utils.get_url(f"{config.HOST_API}/user")
+    url = f"{config.config.host_api}/user"
+    response = utils.get_url(url)
     if response.status_code != 200:
         raise RuntimeError("Could not user information")
     elif not response.encoding:
-        raise RuntimeError(config.NO_ENCODING.format("user"))
+        raise RuntimeError(utils.NO_ENCODING.format("user"))
 
     user = json.loads(response.content.decode(response.encoding))
     user_id = user['id']
@@ -31,8 +32,8 @@ def main() -> None:
     config.logger.info(f"Your user ID is {user_id}.")
     choice = input("Would you like to store this in the configuration? [yN] ")
     if choice.lower().startswith('y'):
-        config.config['uid'] = user_id
-        config.write_config()
+        setattr(config.config, 'uid', user_id)
+        config.config.write_config()
         config.logger.info("User ID was stored in config.json.")
     else:
         config.logger.info("User ID was not stored.")

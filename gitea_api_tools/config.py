@@ -2,7 +2,6 @@ import json
 import logging
 import logging.handlers
 import os
-import re
 import sys
 from pathlib import Path
 from typing import Tuple
@@ -56,7 +55,6 @@ def get_os_dirs() -> Tuple[Path, Path]:
 
 # Logger related
 
-
 def create_logger(cache_dir: Path) -> logging.Logger:
     """Create logger into the cache directory.
 
@@ -100,99 +98,112 @@ def create_logger(cache_dir: Path) -> logging.Logger:
     return logger
 
 
+# Configuration file reading and validating
+
+
+class Config:
+    """Represents the configuration file as an object.
+
+    Note that the object makes no attempt to validate the attributes when
+    initializing.
+
+    However, this class is designed specifically to compare the user config
+    with the example. To do so, use the method is_config_ok().
+
+    """
+
+    _exit_invalid = 1
+    _load_errors = (
+        TypeError,
+        ValueError,
+        json.decoder.JSONDecodeError,
+        )
+    # _ok_same_value is a list of keys in which values can be the same
+    # between the user and sample configurations.
+    _ok_same_value = [
+        "search_archived_repos",
+        ]
+
+    def __init__(self, file: Path) -> None:
+        """Initialize the configuration class with the file."""
+        self.file = file
+
+        try:
+            with file.open() as _f:
+                contents = json.load(_f)
+        except FileNotFoundError:
+            logger.error(f"{file} does not exist")
+            sys.exit(self._exit_invalid)
+        except self._load_errors as e:
+            logger.error(f"{file} exists but is malformed. More info:\n{e}")
+            sys.exit(self._exit_invalid)
+
+        for attr, val in contents.items():
+            setattr(self, attr, val)
+            if attr == 'host':
+                self.host_api = f"{val}/api/v1"
+
+        self.keys = contents.keys()
+
+    def validate(self) -> bool:
+        """Check whether the user supplied configuration is usable.
+
+        Returns:
+            bool: True if the user config is usable; False otherwise
+
+                Specifically, if the user configuration contains any key-values
+                that are unchanged from the example, then return False. If any
+                keys are missing, then also return False.
+
+        """
+        for key in _example.keys:
+            ex_val = getattr(self, key)
+
+            try:
+                user_val = getattr(_example, key)
+            except AttributeError:
+                return False
+            except NameError:
+                raise RuntimeError("The example configuration was not found")
+
+            if ex_val == user_val and key not in self._ok_same_value:
+                return False
+
+        return True
+
+    def write_config(self) -> None:
+        """Write (valid) configuration back to file.
+
+        Raises:
+            RuntimeError: could not validate configuration
+
+        """
+        if not self.validate():
+            raise RuntimeError("Could not validate configuration")
+
+        with self.file.open('w') as f:
+            json.dump(config, fp=f, indent=4)
+
+        with self.file.open('a') as f:
+            f.write('\n')
+
+
 config_dir, cache_dir = get_os_dirs()
 logger = create_logger(cache_dir)
 
-# Configuration file reading and validating
+config = Config(config_dir / 'config.json')
+_example = Config(Path(__file__).parent / 'config.json.example')
+if not config.validate():
+    raise RuntimeError("Could not validate configuration")
 
-_CONFIG_LOAD_ERRORS = (
-    FileNotFoundError,
-    KeyError,
-    TypeError,
-    ValueError,
-    json.decoder.JSONDecodeError,
-    )
-
-EXIT_CONFIG_INVALID = 1
-EXIT_CONFIG_DEFAULT = 2
-EXIT_CONFIG_DEFAULT_VALUES = 3
-EXIT_CONFIG_EMPTY_VALUE = 4
-EXIT_CONFIG_MISSING_REQUIRED = 5
-EXIT_NO_ARGS = 10
-
-try:
-    with open('config.json') as _f:
-        config = json.load(_f)
-except _CONFIG_LOAD_ERRORS as e:
-    logger.error("config.json doesn't exist or is malformed.")
-    logger.error(f'More information: {e}')
-    sys.exit(EXIT_CONFIG_INVALID)
-
-with open('config.json.example') as _f:
-    _DEFAULTS = json.load(_f)
-
-
-def validate_configuration() -> None:
-    """Validate the configuration."""
-    exit = 0
-
-    required_fields = {"host", "token", "search_archived_repos"}
-    fields = set(config.keys())
-
-    if _DEFAULTS == config:
-        logger.error(
-            "config.json has default values. Modify them with your own.")
-        exit = EXIT_CONFIG_DEFAULT
-    elif not required_fields.issubset(fields):
-        logger.error("config.json is missing required fields.")
-        exit = EXIT_CONFIG_MISSING_REQUIRED
-    elif not config['token'] or not config['host']:
-        logger.error('"token" and "host" are required fields for config.json.')
-        exit = EXIT_CONFIG_EMPTY_VALUE
-    elif config['token'] == _DEFAULTS['token']:
-        logger.error('Enter your own token under "token".')
-        logger.error("Reference: https://docs.gitea.io/en-us/api-usage/")
-        exit = EXIT_CONFIG_DEFAULT_VALUES
-    elif config['host'] == _DEFAULTS['host']:
-        logger.error('Enter your own Gitea instance under "host".')
-        exit = EXIT_CONFIG_DEFAULT_VALUES
-    elif 'uid' in config:
-        if type(config['uid']) is not int and not config['uid'].isnum():
-            logger.error('User IDs ("uid") are strictly numbers and optional.')
-            logger.error('If not used, delete the key-value pair for "uid".')
-            exit = EXIT_CONFIG_DEFAULT_VALUES
-    elif 'uid' not in config:
-        config['uid'] = 0
-
-    if exit:
-        sys.exit(exit)
-
-
-def write_config() -> None:
-    """Write (valid) configuration back to file."""
-    validate_configuration()
-
-    with open('config.json', 'w') as f:
-        json.dump(config, fp=f, indent=4)
-
-    with open('config.json', 'a') as f:
-        f.write('\n')
-
-
-validate_configuration()
 
 # Post-validation variables
 
-UID = int(config['uid'])
-HOST_API = f"{config['host']}/api/v1"
 HEADERS = {
-    "Authorization": f"token {config['token']}",
+    "Authorization": f"token {getattr(config, 'token')}",
     "Accept": "application/json",
     }
-SEARCH_ARCHIVED_REPOS = bool(config['search_archived_repos'])
 
 # Other configuration
 
 SWAGGER_API_LIMIT = 999_999_999
-PACKAGE_VERSION = re.compile(r'^[0-9]+\.[0-9]+\.[0-9]+$')
-NO_ENCODING = "No encoding was detected when {}"

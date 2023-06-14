@@ -19,7 +19,7 @@ def search_repos_for_dep(dependency: str) -> None:
     repos = utils.list_repos()
     for user, repo in repos:
         u_repo = f"{user}/{repo}"
-        current_repo = f"{config.HOST_API}/repos/{u_repo}"
+        current_repo = f"{config.config.host_api}/repos/{u_repo}"
         if not utils.is_repo_using_language(current_repo, 'Python'):
             continue
 

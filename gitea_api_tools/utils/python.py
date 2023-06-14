@@ -1,4 +1,5 @@
 import json
+import re
 import tomllib
 from typing import Dict
 
@@ -8,6 +9,7 @@ from .. import utils
 PACKAGE = str
 VERSION = str
 REQUIREMENTS = Dict[PACKAGE, VERSION]
+PACKAGE_VERSION = re.compile(r'^[0-9]+\.[0-9]+\.[0-9]+$')
 
 
 def process_requirementstxt(repo: str) -> REQUIREMENTS:

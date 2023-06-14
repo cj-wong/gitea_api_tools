@@ -3,6 +3,8 @@ import argparse
 from . import config
 from . import utils
 
+from .utils import python as u_python
+
 
 parser = argparse.ArgumentParser(
     description="Python dependency scanner for Gitea API")
@@ -11,7 +13,7 @@ parser.add_argument("version", type=str, help="package version")
 
 
 def get_outdated_dep_version(
-        dependencies: utils.python.REQUIREMENTS, p_name: str,
+        dependencies: u_python.REQUIREMENTS, p_name: str,
         p_ver: utils.Version) -> str:
     """Get the requirement version, if present.
 
@@ -67,12 +69,12 @@ def compare_dependency(
     outdated = 0
     for user, repo in repos:
         u_repo = f"{user}/{repo}"
-        current_repo = f"{config.HOST_API}/repos/{u_repo}"
+        current_repo = f"{config.config.host_api}/repos/{u_repo}"
         if not utils.is_repo_using_language(current_repo, 'Python'):
             continue
 
         try:
-            requirements = utils.python.process_requirements(current_repo)
+            requirements = u_python.process_requirements(current_repo)
         except ValueError:
             # Silently ignore missing requirements
             continue
@@ -98,7 +100,7 @@ def main() -> None:
     args = parser.parse_args()
     pkg_name = args.package
     pkg_ver = args.version
-    if not config.PACKAGE_VERSION.match(pkg_ver):
+    if not u_python.PACKAGE_VERSION.match(pkg_ver):
         config.logger.warning(f"{pkg_ver} does not appear to match x.y.z.")
         config.logger.warning("Comparisons may not work correctly.")
 

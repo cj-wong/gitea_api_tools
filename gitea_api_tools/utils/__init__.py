@@ -12,6 +12,7 @@ from . import python
 __all__ = ["python"]
 
 REPOS = List[Tuple[str, str]]
+NO_ENCODING = "No encoding was detected when {}"
 
 
 def get_url(url: str) -> requests.models.Response:
@@ -38,8 +39,7 @@ def get_repo_file_contents(repo: str, file: str) -> str:
     if response.status_code != 200:
         raise FileNotFoundError(f"Project does not use {file}")
     elif not response.encoding:
-        config.logger.error(
-            config.NO_ENCODING.format(f"getting {file}"))
+        config.logger.error(NO_ENCODING.format(f"getting {file}"))
         raise ValueError("Could not decode file")
 
     contents = response.content.decode(response.encoding).strip()
@@ -88,13 +88,24 @@ def list_repos() -> REPOS:
         RuntimeError: no encoding detected in request; request may be invalid
 
     """
-    url = f"{config.HOST_API}/repos/search?limit={config.SWAGGER_API_LIMIT}"
-    url = f"{url}&archived={config.SEARCH_ARCHIVED_REPOS}"
-    if config.UID:
-        url = f"{url}&uid={config.UID}"
-    response = get_url(url)
+    try:
+        search_archived_repos = getattr(config.config, 'search_archived_repos')
+    except AttributeError as e:
+        raise RuntimeError("Configuration is malformed") from e
+
+    url_parts = [
+        f"{config.config.host_api}/repos/search",
+        f"?limit={config.SWAGGER_API_LIMIT}",
+        f"&archived={search_archived_repos}",
+        ]
+
+    uid = getattr(config.config, 'uid', None)
+    if uid:
+        url_parts.append(f"&uid={uid}")
+
+    response = get_url(''.join(url_parts))
     if not response.encoding:
-        raise RuntimeError(config.NO_ENCODING.format("fetching repos"))
+        raise RuntimeError(NO_ENCODING.format("fetching repos"))
     repos = json.loads(response.content.decode(response.encoding))['data']
     return [repo["full_name"].split('/') for repo in repos]
 
@@ -112,8 +123,7 @@ def is_repo_using_language(repo: str, language: str) -> bool:
     """
     response = get_url(f"{repo}/languages")
     if not response.encoding:
-        config.logger.error(
-            config.NO_ENCODING.format("checking languages"))
+        config.logger.error(NO_ENCODING.format("checking languages"))
         return False
 
     langs = json.loads(response.content.decode(response.encoding))
