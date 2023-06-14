@@ -36,11 +36,20 @@ def search_repos_for_dep(dependency: str) -> None:
             config.logger.info(f"{u_repo}: {version}")
 
 
-def main() -> None:
-    """Use args from command line."""
+def oldmain() -> None:
+    """Get Python repositories that use the provided package.
+
+    Note: This is the pre-1.0.0 function and has been deprecated.
+
+    """
     args = parser.parse_args()
-    search_repos_for_dep(args.package)
+    main(args.package)
+
+
+def main(pkg: str) -> None:
+    """Get Python repositories that use the provided package."""
+    search_repos_for_dep(pkg)
 
 
 if __name__ == '__main__':
-    main()
+    oldmain()

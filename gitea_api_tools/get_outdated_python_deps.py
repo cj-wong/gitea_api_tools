@@ -96,18 +96,31 @@ def compare_dependency(
         config.logger.info("No packages are affected")
 
 
-def main() -> None:
-    """Run all of the API requests."""
+def oldmain() -> None:
+    """Get the outdated Python packages.
+
+    Note: This is the pre-1.0.0 function and has been deprecated.
+
+    """
     args = parser.parse_args()
-    pkg_name = args.package
-    pkg_ver = args.version
-    if not language.python.PACKAGE_VERSION.match(pkg_ver):
-        config.logger.warning(f"{pkg_ver} does not appear to match x.y.z.")
+    main(args.package, args.version)
+
+
+def main(pkg: str, version: str) -> None:
+    """Get the outdated Python packages.
+
+    Args:
+        pkg: package name
+        version: version string
+
+    """
+    if not language.python.PACKAGE_VERSION.match(version):
+        config.logger.warning(f"{version} does not appear to match x.y.z.")
         config.logger.warning("Comparisons may not work correctly.")
 
     repos = gitea.list_repos()
-    compare_dependency(repos, pkg_name, package.Version(pkg_ver))
+    compare_dependency(repos, pkg, package.Version(version))
 
 
 if __name__ == '__main__':
-    main()
+    oldmain()

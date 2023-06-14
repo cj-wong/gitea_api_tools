@@ -17,6 +17,7 @@ flake8 = "^6.0.0"
 mypy = "^1.0.1"
 
 [tool.poetry.scripts]
+gitea-api = 'gitea_api_tools:main'
 get-deploy-keys = 'gitea_api_tools.get_deploy_keys:main'
 get-outdated-python-deps = 'gitea_api_tools.get_outdated_python_deps:main'
 get-python-deps = 'gitea_api_tools.get_python_dep_repos:main'
