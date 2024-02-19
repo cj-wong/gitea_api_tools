@@ -3,6 +3,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.0] - 2024-02-18
+### Added
+- Added new sub-command `gitea-api configure`. This command allows users to interactively configure settings.
+- Added a new document for `gitea-api` under [docs](./docs).
+
+### Changed
+- The `config.py` module is now a full-fledged library/module.
+    - Individual parts have been split into new scripts (`logging`, `paths`). This split has allowed me to create the aforementioned sub-command `configure`.
+
+### Security
+- Bumped dependencies, including `urllib3` to >=1.26.18.
+
+### Removed
+- Removed `requirements.txt` - this project has been using `poetry` for awhile.
+
 ## [1.0.0] - 2023-06-14
 ### Added
 - Added support for OS-dependent configuration directories. For Linux (and most likely Cygwin), XDG directories are supported. For Windows, approximate analogs are used. MacOS is currently unsupported, as I have no idea which directories apply.
