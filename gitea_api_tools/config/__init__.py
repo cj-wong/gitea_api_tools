@@ -1,102 +1,14 @@
 import json
-import logging
-import logging.handlers
-import os
 import sys
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict
+
+from . import logging
+from . import paths
 
 
 _PROJECT_NAME = 'gitea-api-tools'
 _CONFIG = Dict[str, str | int]
-
-
-def get_os_dirs() -> Tuple[Path, Path]:
-    """Get directories corresponding to OS configuration/cache.
-
-    Returns:
-        Tuple[Path, Path]:
-
-            1.  configuration directory; on Linux, it'd be XDG_CONFIG_HOME
-            2.  cache/data directory; on Linux, it can be XDG_STATE_HOME
-
-    Raises:
-        RuntimeError: for one of two reasons:
-
-            1.  OS is not supported. Currently, only Linux (and by extension,
-                cygwin) and Windows are supported.
-            2.  Windows was detected but it's missing a critical environment
-                variable: LocalAppData.
-
-    """
-    win32_err = (
-        "Your OS reported itself as Windows but"
-        " it's missing environment variables")
-    if sys.platform.startswith("linux") or sys.platform.startswith("cygwin"):
-        config_root = Path(
-            os.environ.get('XDG_CONFIG_HOME', '~/.config')).expanduser()
-        config_dir = config_root / _PROJECT_NAME
-        config_dir.mkdir(parents=True, exist_ok=True)
-        cache_root = Path(
-            os.environ.get('XDG_STATE_HOME', '~/.local/state')).expanduser()
-        cache_dir = cache_root / _PROJECT_NAME
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        return (config_dir, cache_dir)
-    elif sys.platform.startswith("win32"):
-        try:
-            data_root = Path(os.environ.get('LOCALAPPDATA'))
-        except TypeError as e:
-            raise RuntimeError(win32_err) from e
-        data_dir = data_root / _PROJECT_NAME
-        data_dir.mkdir(parents=True, exist_ok=True)
-        return (data_dir, data_dir)
-
-    raise RuntimeError("This project does not support your operating system")
-
-
-# Logger related
-
-def create_logger(cache_dir: Path) -> logging.Logger:
-    """Create logger into the cache directory.
-
-    Args:
-        cache_dir: the path to the cache directory for logging
-
-    Returns:
-        logging.Logger: the logger
-
-    """
-    log_file = cache_dir / f'{_PROJECT_NAME}.log'
-    max_log_size = 40960
-    max_log_files = 5
-
-    logger = logging.getLogger(_PROJECT_NAME)
-    logger.setLevel(logging.DEBUG)
-
-    file_handler = logging.handlers.RotatingFileHandler(
-        log_file,
-        maxBytes=max_log_size,
-        backupCount=max_log_files,
-        )
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(
-        logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-            )
-        )
-
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    console_handler.setFormatter(
-        logging.Formatter(
-            '%(levelname)s - %(message)s'
-            )
-        )
-
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
-
-    return logger
 
 
 # Configuration file reading and validating
@@ -137,7 +49,8 @@ class Config:
             logger.error(f"{file} does not exist")
             sys.exit(self._exit_invalid)
         except self._load_errors as e:
-            logger.error(f"{file} exists but is malformed. More info:\n{e}")
+            logger.error(
+                f"{file} exists but is malformed. More info:\n{e}")
             sys.exit(self._exit_invalid)
 
         for attr, val in contents.items():
@@ -179,8 +92,8 @@ class Config:
             f.write('\n')
 
 
-config_dir, cache_dir = get_os_dirs()
-logger = create_logger(cache_dir)
+config_dir, cache_dir = paths.get_os_dirs(_PROJECT_NAME)
+logger = logging.create_logger(_PROJECT_NAME, cache_dir)
 
 user_config = Config(config_dir / 'config.json')
 _example = Config(Path(__file__).parent / 'config.json.example')
@@ -223,3 +136,8 @@ HEADERS = {
     }
 
 # Other configuration
+
+__all__ = [
+    "logging",
+    "paths",
+]
