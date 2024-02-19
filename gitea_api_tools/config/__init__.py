@@ -1,17 +1,24 @@
 import json
 import sys
 from pathlib import Path
-from typing import Dict
 
 from . import logging
 from . import paths
 
 
 _PROJECT_NAME = 'gitea-api-tools'
-_CONFIG = Dict[str, str | int]
+_CONFIG = dict[str, str | int]
 
+ERR_COULD_NOT_CONFIGURE = 1
 
 # Configuration file reading and validating
+
+
+class InvalidConfiguration(ValueError):
+    """User configuration is invalid."""
+
+    def __init__(self, message: str) -> None:
+        logger.exception(message)
 
 
 class Config:
@@ -31,7 +38,7 @@ class Config:
         ValueError,
         json.decoder.JSONDecodeError,
         )
-    # _ok_same_value is a list of keys in which values can be the same
+    # _ok_same_value is a list of field in which values can be the same
     # between the user and sample configurations.
     _ok_same_value = [
         "uid",
@@ -46,19 +53,22 @@ class Config:
             with file.open() as _f:
                 contents = json.load(_f)
         except FileNotFoundError:
-            logger.error(f"{file} does not exist")
-            sys.exit(self._exit_invalid)
+            error = f"{file} does not exist; an empty file was created"
+            logger.warning(error)
+            file.touch()
+            with file.open("w") as _g:
+                _g.write(r"{}")
+            contents = {}
         except self._load_errors as e:
-            logger.error(
-                f"{file} exists but is malformed. More info:\n{e}")
-            sys.exit(self._exit_invalid)
+            error = f"{file} exists but is malformed. More info:\n{e}"
+            raise InvalidConfiguration(error) from e
 
         for attr, val in contents.items():
             setattr(self, attr, val)
             if attr == 'host':
                 self.host_api = f"{val}/api/v1"
 
-        self.keys = contents.keys()
+        self.fields = contents.keys()
 
     def get_as_dict(self) -> _CONFIG:
         """Convert the configuration back into a dictionary.
@@ -68,8 +78,8 @@ class Config:
 
         """
         as_dict: _CONFIG = {}
-        for key in _example.keys:
-            as_dict[key] = getattr(self, key)
+        for field in _example.fields:
+            as_dict[field] = getattr(self, field)
 
         return as_dict
 
@@ -95,8 +105,14 @@ class Config:
 config_dir, cache_dir = paths.get_os_dirs(_PROJECT_NAME)
 logger = logging.create_logger(_PROJECT_NAME, cache_dir)
 
-user_config = Config(config_dir / 'config.json')
 _example = Config(Path(__file__).parent / 'config.json.example')
+user_config_path = config_dir / 'config.json'
+try:
+    user_config = Config(user_config_path)
+except InvalidConfiguration:
+    logger.error(
+        "Could not load the configuration. You may need to delete the file.")
+    sys.exit(ERR_COULD_NOT_CONFIGURE)
 
 
 def validate(u_config: Config = user_config) -> bool:
@@ -109,20 +125,26 @@ def validate(u_config: Config = user_config) -> bool:
         bool: True if the user (or supplied) config is valid; False otherwise
 
     """
-    for key in _example.keys:
+    for field in _example.fields:
         try:
-            user_val = getattr(user_config, key)
-        except KeyError:
-            return False
-
-        try:
-            ex_val = getattr(_example, key)
+            ex_val = getattr(_example, field)
         except AttributeError:
             return False
         except NameError:
             raise RuntimeError("The example configuration was not found")
 
-        if user_val == ex_val and key not in user_config._ok_same_value:
+        # This is an optional field
+        optional = not ex_val
+
+        try:
+            user_val = getattr(u_config, field)
+        except AttributeError:
+            if optional:
+                continue
+            else:
+                return False
+
+        if user_val == ex_val and field not in u_config._ok_same_value:
             return False
 
     return True

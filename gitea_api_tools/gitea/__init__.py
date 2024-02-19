@@ -8,17 +8,42 @@ import requests
 from .. import config
 
 
-HEADERS = {
-    "Authorization": f"token {getattr(config.user_config, 'token')}",
-    "Accept": "application/json",
-    }
+try:
+    HEADERS = {
+        "Authorization": f"token {getattr(config.user_config, 'token')}",
+        "Accept": "application/json",
+        }
+except AttributeError:
+    config.logger.error("Could not load token. gitea.get_url() disabled")
+    REQUESTS_AVAILABLE = False
+else:
+    REQUESTS_AVAILABLE = True
+
+
+ERR_NO_TOKEN = "Can't execute requests without token"
 
 REPOS = List[Tuple[str, str]]
 NO_ENCODING = "No encoding was detected when {}"
 
 
 def get_url(url: str) -> requests.models.Response:
-    """Call requests.get with headers from config."""
+    """Call requests.get with headers from config.
+
+    Because this is the most basic function of this module, no requests will
+    be served if token is unavailable.
+
+    Args:
+        url: full URL to Gitea instance API
+
+    Returns:
+        requests.models.Response
+
+    Raises:
+        RuntimeError: no token, no requests
+
+    """
+    if not REQUESTS_AVAILABLE:
+        raise RuntimeError(ERR_NO_TOKEN)
     return requests.get(url, headers=HEADERS)
 
 

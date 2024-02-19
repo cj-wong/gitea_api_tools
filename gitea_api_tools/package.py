@@ -96,7 +96,7 @@ class NotFound(BaseException):
 
     def __init__(self) -> None:
         """Initialize with error message."""
-        super().__init__("Package was not found")
+        super("Package was not found")
 
 
 class MismatchedVersionFormat(ValueError):
@@ -104,7 +104,7 @@ class MismatchedVersionFormat(ValueError):
 
     def __init__(self) -> None:
         """Initialize with error message."""
-        super().__init__("Package version format could not be compared")
+        super("Package version format could not be compared")
 
 
 class CouldNotParse(ValueError):
@@ -112,4 +112,4 @@ class CouldNotParse(ValueError):
 
     def __init__(self) -> None:
         """Initialize with error message."""
-        super().__init__("Could not parse package name")
+        super("Could not parse package name")
