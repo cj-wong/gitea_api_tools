@@ -8,13 +8,18 @@ import requests
 from .. import config
 
 
+HEADERS = {
+    "Authorization": f"token {getattr(config.user_config, 'token')}",
+    "Accept": "application/json",
+    }
+
 REPOS = List[Tuple[str, str]]
 NO_ENCODING = "No encoding was detected when {}"
 
 
 def get_url(url: str) -> requests.models.Response:
     """Call requests.get with headers from config."""
-    return requests.get(url, headers=config.HEADERS)
+    return requests.get(url, headers=HEADERS)
 
 
 def get_repo_file_contents(repo: str, file: str) -> str:

@@ -60,7 +60,7 @@ class Config:
 
         self.keys = contents.keys()
 
-    def convert_to_dict(self) -> _CONFIG:
+    def get_as_dict(self) -> _CONFIG:
         """Convert the configuration back into a dictionary.
 
         Returns:
@@ -83,7 +83,7 @@ class Config:
         if not validate(self):
             raise RuntimeError("Could not validate configuration")
 
-        as_dict = self.convert_to_dict()
+        as_dict = self.get_as_dict()
 
         with self.file.open('w') as f:
             json.dump(as_dict, fp=f, indent=4)
@@ -129,11 +129,6 @@ def validate(u_config: Config = user_config) -> bool:
 
 
 # Post-validation variables
-
-HEADERS = {
-    "Authorization": f"token {getattr(user_config, 'token')}",
-    "Accept": "application/json",
-    }
 
 # Other configuration
 
