@@ -16,7 +16,7 @@ The code was tested with the following:
 
 ## Setup
 
-Run `poetry install` on the project root to get started. This will grant access to the `gitea-api` script.
+Run `poetry install` on the project root to get started. This will grant access to the `gitea-api` script. Once created, `gitea-api` can be sym-linked from wherever the environment is to a more convenient place like `~/.local/bin`.
 
 Copy `config.json.example` and make `config.json`, replacing the temporary values:
 
