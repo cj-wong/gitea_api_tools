@@ -147,32 +147,6 @@ class Config:
 
         self.keys = contents.keys()
 
-    def validate(self) -> bool:
-        """Check whether the user supplied configuration is usable.
-
-        Returns:
-            bool: True if the user config is usable; False otherwise
-
-                Specifically, if the user configuration contains any key-values
-                that are unchanged from the example, then return False. If any
-                keys are missing, then also return False.
-
-        """
-        for key in _example.keys:
-            user_val = getattr(self, key)
-
-            try:
-                ex_val = getattr(_example, key)
-            except AttributeError:
-                return False
-            except NameError:
-                raise RuntimeError("The example configuration was not found")
-
-            if user_val == ex_val and key not in self._ok_same_value:
-                return False
-
-        return True
-
     def convert_to_dict(self) -> _CONFIG:
         """Convert the configuration back into a dictionary.
 
@@ -193,7 +167,7 @@ class Config:
             RuntimeError: could not validate configuration
 
         """
-        if not self.validate():
+        if not validate(self):
             raise RuntimeError("Could not validate configuration")
 
         as_dict = self.convert_to_dict()
@@ -208,16 +182,43 @@ class Config:
 config_dir, cache_dir = get_os_dirs()
 logger = create_logger(cache_dir)
 
-config = Config(config_dir / 'config.json')
+user_config = Config(config_dir / 'config.json')
 _example = Config(Path(__file__).parent / 'config.json.example')
-if not config.validate():
-    raise RuntimeError("Could not validate configuration")
+
+
+def validate(u_config: Config = user_config) -> bool:
+    """Validate the configuration.
+
+    Args:
+        u_config: user config; defaults to already instantiated user_config
+
+    Returns:
+        bool: True if the user (or supplied) config is valid; False otherwise
+
+    """
+    for key in _example.keys:
+        try:
+            user_val = getattr(user_config, key)
+        except KeyError:
+            return False
+
+        try:
+            ex_val = getattr(_example, key)
+        except AttributeError:
+            return False
+        except NameError:
+            raise RuntimeError("The example configuration was not found")
+
+        if user_val == ex_val and key not in user_config._ok_same_value:
+            return False
+
+    return True
 
 
 # Post-validation variables
 
 HEADERS = {
-    "Authorization": f"token {getattr(config, 'token')}",
+    "Authorization": f"token {getattr(user_config, 'token')}",
     "Accept": "application/json",
     }
 

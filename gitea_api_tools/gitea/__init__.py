@@ -86,14 +86,15 @@ def list_repos() -> REPOS:
 
     """
     try:
-        search_archived_repos = getattr(config.config, 'search_archived_repos')
+        search_archived_repos = getattr(
+            config.user_config, 'search_archived_repos')
     except AttributeError as e:
         raise RuntimeError("Configuration is malformed") from e
 
-    url = f"{config.config.host_api}/repos/search"
+    url = f"{config.user_config.host_api}/repos/search"
     url = f"{url}?archived={search_archived_repos}"
 
-    uid = getattr(config.config, 'uid', None)
+    uid = getattr(config.user_config, 'uid', None)
     if uid:
         url = f"{url}&uid={uid}"
 

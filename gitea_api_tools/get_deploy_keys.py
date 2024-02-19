@@ -6,6 +6,9 @@ from . import config
 from . import gitea
 
 
+config.validate()
+
+
 REPO_KEYS = Dict[Tuple[str, str], List[str]]
 KEY_MESSAGE = """
 Public Key:     {}
@@ -35,8 +38,8 @@ def main() -> None:
     repos = gitea.list_repos()
     for user, repo in repos:
         u_repo = f"{user}/{repo}"
-        current_repo_keys = f"{config.config.host_api}/repos/{u_repo}/keys"
-        response = gitea.get_url(current_repo_keys)
+        curr_repo_keys = f"{config.user_config.host_api}/repos/{u_repo}/keys"
+        response = gitea.get_url(curr_repo_keys)
         if response.status_code != 200:
             config.logger.warning(f"Could not access keys for {u_repo}")
             continue

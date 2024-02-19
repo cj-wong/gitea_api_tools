@@ -4,6 +4,9 @@ from . import config
 from . import gitea
 
 
+config.validate()
+
+
 def get_user_id() -> int:
     """Get the user ID.
 
@@ -14,7 +17,7 @@ def get_user_id() -> int:
         RuntimeError: could not get encoding
 
     """
-    url = f"{config.config.host_api}/user"
+    url = f"{config.user_config.host_api}/user"
     response = gitea.get_url(url)
     if response.status_code != 200:
         raise RuntimeError("Could not user information")
@@ -28,7 +31,7 @@ def get_user_id() -> int:
 
 def main() -> None:
     """Get the user ID and optionally store it into the configuration."""
-    old_uid = getattr(config.config, 'uid')
+    old_uid = getattr(config.user_config, 'uid')
     if old_uid:
         config.logger.warning(
             f"Your user ID ({old_uid}) has already been configured.")
@@ -52,8 +55,8 @@ def main() -> None:
 
     choice = input("Would you like to store this in the configuration? [yN] ")
     if choice.lower().startswith('y'):
-        setattr(config.config, 'uid', new_uid)
-        config.config.write_config()
+        setattr(config.user_config, 'uid', new_uid)
+        config.user_config.write_config()
         config.logger.info("User ID was stored in config.json.")
     else:
         config.logger.info("User ID was not stored.")

@@ -5,6 +5,9 @@ from . import gitea
 from . import language
 
 
+config.validate()
+
+
 parser = argparse.ArgumentParser(
     description="Python dependency checker for Gitea API")
 parser.add_argument("package", type=str, help="package name on PyPI")
@@ -20,7 +23,7 @@ def search_repos_for_dep(dependency: str) -> None:
     repos = gitea.list_repos()
     for user, repo in repos:
         u_repo = f"{user}/{repo}"
-        current_repo = f"{config.config.host_api}/repos/{u_repo}"
+        current_repo = f"{config.user_config.host_api}/repos/{u_repo}"
         if not gitea.is_repo_using_language(current_repo, 'Python'):
             continue
 
