@@ -1,6 +1,6 @@
 import unittest
 
-from utils import Version
+from gitea_api_tools.package import Version
 
 
 class TestVersion(unittest.TestCase):
