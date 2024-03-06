@@ -8,7 +8,7 @@ from .config import configure
 
 
 parser = argparse.ArgumentParser()
-subparsers = parser.add_subparsers(required=True)
+subparsers = parser.add_subparsers(required=True, dest="command")
 
 # Sub-commands that take no arguments
 parser_configure = subparsers.add_parser("configure")
@@ -20,24 +20,18 @@ parser_python = subparsers.add_parser("python")
 parser_python.add_argument("package")
 parser_python.add_argument("-v", "--version")
 
-# Because the contents of parsers get flattened into a single namespace, it's
-# necessary to add a sentinel argument to know which sub-command was called.
-for subparser in subparsers.choices.values():
-    subparser.add_argument(
-        "_", action="store_const", const=subparser.prog, help="ignore this")
-
 
 def main() -> None:
     """Run the Gitea API toolkit."""
     args = parser.parse_args()
-    match args._.split():
-        case [_, "configure"]:
+    match args.command:
+        case "configure":
             configure.configure_interactively()
-        case [_, "deploy_keys"]:
+        case "deploy_keys":
             get_deploy_keys.main()
-        case [_, "user_id"]:
+        case "user_id":
             get_user_id.main()
-        case [_, "python"]:
+        case "python":
             if args.version:
                 get_outdated_python_deps.main(args.package, args.version)
             else:
