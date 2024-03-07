@@ -3,6 +3,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.2.0] - 2024-03-06
+### Changed
+- Python code is now formatted with `black`.
+- Users can now execute the code with `python3 -m gitea_api_tools` as an alternative to the `poetry` setup.
+- Combined `gitea_api_tools/language/` with `package.py`, since `language` has only worked with packages.
+- Instead of using a dummy argument, the main command now uses `dest=` in the sub-parser for identifying the executed sub-command.
+
+### Fixed
+- `types-request` was added as a dependency, but it is actually only a dev dependency.
+
+### Deprecated
+- All the individual scripts are now deprecated. Their functionality has been pulled out to (sub)modules within `gitea_api_tools/gitea/` and `gitea_api_tools/package`. Although the scripts have been updated to work with the new modules, no more work will be done on these scripts, and they will be removed on the next major update.
+
 ## [1.1.0] - 2024-02-18
 ### Added
 - Added new sub-command `gitea-api configure`. This command allows users to interactively configure settings.
