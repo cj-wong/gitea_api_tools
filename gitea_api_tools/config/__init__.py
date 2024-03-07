@@ -6,7 +6,7 @@ from . import logging
 from . import paths
 
 
-_PROJECT_NAME = 'gitea-api-tools'
+_PROJECT_NAME = "gitea-api-tools"
 _CONFIG = dict[str, str | int]
 
 ERR_COULD_NOT_CONFIGURE = 1
@@ -37,13 +37,13 @@ class Config:
         TypeError,
         ValueError,
         json.decoder.JSONDecodeError,
-        )
+    )
     # _ok_same_value is a list of field in which values can be the same
     # between the user and sample configurations.
     _ok_same_value = [
         "uid",
         "search_archived_repos",
-        ]
+    ]
 
     def __init__(self, file: Path) -> None:
         """Initialize the configuration class with the file."""
@@ -65,7 +65,7 @@ class Config:
 
         for attr, val in contents.items():
             setattr(self, attr, val)
-            if attr == 'host':
+            if attr == "host":
                 self.host_api = f"{val}/api/v1"
 
         self.fields = contents.keys()
@@ -95,23 +95,24 @@ class Config:
 
         as_dict = self.get_as_dict()
 
-        with self.file.open('w') as f:
+        with self.file.open("w") as f:
             json.dump(as_dict, fp=f, indent=4)
 
-        with self.file.open('a') as f:
-            f.write('\n')
+        with self.file.open("a") as f:
+            f.write("\n")
 
 
 config_dir, cache_dir = paths.get_os_dirs(_PROJECT_NAME)
 logger = logging.create_logger(_PROJECT_NAME, cache_dir)
 
-_example = Config(Path(__file__).parent / 'config.json.example')
-user_config_path = config_dir / 'config.json'
+_example = Config(Path(__file__).parent / "config.json.example")
+user_config_path = config_dir / "config.json"
 try:
     user_config = Config(user_config_path)
 except InvalidConfiguration:
     logger.error(
-        "Could not load the configuration. You may need to delete the file.")
+        "Could not load the configuration. You may need to delete the file."
+    )
     sys.exit(ERR_COULD_NOT_CONFIGURE)
 
 

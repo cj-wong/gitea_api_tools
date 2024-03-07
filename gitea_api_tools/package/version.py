@@ -1,7 +1,7 @@
 import re
 
 
-VERSION_PATTERN = re.compile(r'^[0-9]+\.[0-9]+\.[0-9]+$')
+VERSION_PATTERN = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 
 
 class Version:
@@ -32,14 +32,14 @@ class Version:
 
         """
         self.original = ver_str
-        parts = ver_str.split('.')
+        parts = ver_str.split(".")
         last = self.suffix.match(parts[-1])
         if last:
             self.parts = [int(x) for x in parts[:-1]]
             self.parts.append(int(last.group(1)))
             # Convert the letter to an integer representing its position in the
             # alphabet with 0 index.
-            self.parts.append(ord(last.group(2).lower()) - ord('a'))
+            self.parts.append(ord(last.group(2).lower()) - ord("a"))
         else:
             self.parts = [int(x) for x in parts]
 

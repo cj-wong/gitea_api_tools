@@ -10,10 +10,10 @@ class TestVersion(unittest.TestCase):
     # test_version_greater() and test_version_less() in sequential order.
     # Each pair must have the same number of components.
     comparison_versions = [
-        ('2.0.0', '1.0.0'),
-        ('2.0.0', '1.1.0'),
-        ('1.10.0', '1.9.9')
-        ]
+        ("2.0.0", "1.0.0"),
+        ("2.0.0", "1.1.0"),
+        ("1.10.0", "1.9.9"),
+    ]
 
     def test_version_equals(self) -> None:
         """Test that versions are equal.
@@ -22,16 +22,16 @@ class TestVersion(unittest.TestCase):
         the components are all the same value.
 
         """
-        self.assertEqual(Version('1.0.0'), Version('1.0.0'))
-        self.assertEqual(Version('1.0'), Version('1.0'))
-        self.assertEqual(Version('1000'), Version('1000'))
-        self.assertEqual(Version('1.0.0a'), Version('1.0.0a'))
+        self.assertEqual(Version("1.0.0"), Version("1.0.0"))
+        self.assertEqual(Version("1.0"), Version("1.0"))
+        self.assertEqual(Version("1000"), Version("1000"))
+        self.assertEqual(Version("1.0.0a"), Version("1.0.0a"))
 
     def test_version_not_equals(self) -> None:
         """Check that versions shouldn't be equal."""
-        self.assertNotEqual(Version('1.0.0'), Version('1.0'))
-        self.assertNotEqual(Version('1.0.0'), Version('1.0.1'))
-        self.assertNotEqual(Version('1.0.0'), Version('1.0.0a'))
+        self.assertNotEqual(Version("1.0.0"), Version("1.0"))
+        self.assertNotEqual(Version("1.0.0"), Version("1.0.1"))
+        self.assertNotEqual(Version("1.0.0"), Version("1.0.0a"))
 
     def test_version_greater(self) -> None:
         """Test that one version is greater than the other.

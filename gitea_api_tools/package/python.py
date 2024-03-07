@@ -22,7 +22,7 @@ def process_requirementstxt_OLD(repo: str) -> package.formats.REQUIREMENTS:
 
     """
     try:
-        file_contents = gitea.repo.get_file_contents(repo, 'requirements.txt')
+        file_contents = gitea.repo.get_file_contents(repo, "requirements.txt")
     except gitea.repo.ERR_NO_FILE as e:
         raise ValueError("File could not be read") from e
 
@@ -34,9 +34,9 @@ def process_requirementstxt_OLD(repo: str) -> package.formats.REQUIREMENTS:
 
     requirements: package.formats.REQUIREMENTS = {}
 
-    for req in contents.split('\n'):
+    for req in contents.split("\n"):
         try:
-            pkg, version = req.split('==')
+            pkg, version = req.split("==")
         except ValueError as e:
             raise package.CouldNotParse from e
         requirements[pkg] = version
@@ -63,7 +63,7 @@ def process_poetrylock_OLD(repo: str) -> package.formats.REQUIREMENTS:
 
     """
     try:
-        file_contents = gitea.repo.get_file_contents(repo, 'poetry.lock')
+        file_contents = gitea.repo.get_file_contents(repo, "poetry.lock")
     except gitea.repo.ERR_NO_FILE as e:
         raise ValueError("File could not be read") from e
 
@@ -76,9 +76,9 @@ def process_poetrylock_OLD(repo: str) -> package.formats.REQUIREMENTS:
     poetry_reqs = tomllib.loads(contents)
     requirements: package.formats.REQUIREMENTS = {}
 
-    for requirement in poetry_reqs['package']:
-        name = requirement['name']
-        version = requirement['version']
+    for requirement in poetry_reqs["package"]:
+        name = requirement["name"]
+        version = requirement["version"]
         requirements[name] = version
 
     return requirements
@@ -134,9 +134,9 @@ def process_requirements_txt(contents: str) -> package.formats.REQUIREMENTS:
     """
     requirements: package.formats.REQUIREMENTS = {}
 
-    for req in contents.split('\n'):
+    for req in contents.split("\n"):
         try:
-            pkg, version = req.split('==')
+            pkg, version = req.split("==")
         except ValueError as e:
             raise package.CouldNotParse from e
         requirements[pkg] = version
@@ -159,17 +159,17 @@ def process_poetry_lock(contents: str) -> package.formats.REQUIREMENTS:
     poetry_reqs = tomllib.loads(contents)
     requirements: package.formats.REQUIREMENTS = {}
 
-    for requirement in poetry_reqs['package']:
-        name = requirement['name']
-        version = requirement['version']
+    for requirement in poetry_reqs["package"]:
+        name = requirement["name"]
+        version = requirement["version"]
         requirements[name] = version
 
     return requirements
 
 
 def list_dependent_repos(
-        package: str, ver_restrict: version.Version = version.SENTINEL_VERSION
-        ) -> None:
+    package: str, ver_restrict: version.Version = version.SENTINEL_VERSION
+) -> None:
     """List repositories dependent on given `package`.
 
     Args:
@@ -199,5 +199,6 @@ def list_dependent_repos(
                     config.logger.info(f"{repo} is outdated: {repo_version}")
             except (TypeError, ValueError):
                 config.logger.warning(
-                    f"{ver_restrict} can't be compared against {repo_version}")
+                    f"{ver_restrict} can't be compared against {repo_version}"
+                )
                 continue

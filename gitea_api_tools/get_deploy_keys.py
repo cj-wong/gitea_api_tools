@@ -26,7 +26,7 @@ def print_key_repos(repo_keys: REPO_KEYS) -> None:
 
     """
     for (fingerprint, pubkey), repos in repo_keys.items():
-        s_repos = '\n- '.join(repos)
+        s_repos = "\n- ".join(repos)
         config.logger.info(KEY_MESSAGE.format(pubkey, fingerprint, s_repos))
 
 
@@ -46,7 +46,8 @@ def main() -> None:
             continue
         except ValueError:
             config.logger.error(
-                gitea.api.ERR_NO_ENCODING.format("getting deploy keys"))
+                gitea.api.ERR_NO_ENCODING.format("getting deploy keys")
+            )
             raise ValueError("Could not decode file")
 
         keys = json.loads(response)
@@ -56,10 +57,11 @@ def main() -> None:
                 continue
             try:
                 fingerprint = key["fingerprint"]
-                pubkey = ' '.join(key["key"].split()[:pubkey_words])
+                pubkey = " ".join(key["key"].split()[:pubkey_words])
             except KeyError as e:
                 config.logger.error(
-                    f"Couldn't find fingerprint or pubkey for {key} in {repo}")
+                    f"Couldn't find fingerprint or pubkey for {key} in {repo}"
+                )
                 raise e
             rp_name = (fingerprint, pubkey)
             repo_keys[rp_name].append(u_repo)
@@ -67,5 +69,5 @@ def main() -> None:
     print_key_repos(repo_keys)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

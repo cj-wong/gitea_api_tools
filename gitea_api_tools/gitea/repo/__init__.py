@@ -35,7 +35,8 @@ def uses_language(repo: str, language: str) -> bool:
         return False
     except ValueError:
         api.config.logger.error(
-            api.ERR_NO_ENCODING.format("checking languages"))
+            api.ERR_NO_ENCODING.format("checking languages")
+        )
         return False
 
     return language in languages

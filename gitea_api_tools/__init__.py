@@ -18,7 +18,8 @@ parser_user_id = subparsers.add_parser("user_id")
 parser_python = subparsers.add_parser("python")
 parser_python.add_argument("package")
 parser_python.add_argument(
-    "-v", "--version", type=version.Version, default=version.SENTINEL_VERSION)
+    "-v", "--version", type=version.Version, default=version.SENTINEL_VERSION
+)
 
 
 def main() -> None:

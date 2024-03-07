@@ -26,7 +26,7 @@ def list_keyed_repos(repos_keys: REPOS_KEYS) -> None:
 
     """
     for (fingerprint, pubkey), repos in repos_keys.items():
-        s_repos = '\n- '.join(repos)
+        s_repos = "\n- ".join(repos)
         config.logger.info(KEY_MESSAGE.format(pubkey, fingerprint, s_repos))
 
 
@@ -57,8 +57,7 @@ def get_repo_keys(user_repo: str) -> list[tuple[str, str]]:
         config.logger.warning(f"Could not access keys for {user_repo}")
         raise RuntimeError from e
     except ValueError:
-        config.logger.error(
-            api.ERR_NO_ENCODING.format("getting deploy keys"))
+        config.logger.error(api.ERR_NO_ENCODING.format("getting deploy keys"))
         raise ValueError("Could not decode file")
 
     key_data = json.loads(response)
@@ -68,7 +67,7 @@ def get_repo_keys(user_repo: str) -> list[tuple[str, str]]:
             continue
         fingerprint = key["fingerprint"]
         try:
-            pubkey = ' '.join(key["key"].split()[:pubkey_words])
+            pubkey = " ".join(key["key"].split()[:pubkey_words])
         except KeyError as e:
             config.logger.error(f"{user_repo} has malformed key: {key}")
             raise e

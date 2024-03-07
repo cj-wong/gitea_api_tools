@@ -9,7 +9,8 @@ config.validate()
 
 
 parser = argparse.ArgumentParser(
-    description="Python dependency checker for Gitea API")
+    description="Python dependency checker for Gitea API"
+)
 parser.add_argument("package", type=str, help="package name on PyPI")
 
 
@@ -24,7 +25,7 @@ def search_repos_for_dep(dependency: str) -> None:
     for user, repo in repos:
         u_repo = f"{user}/{repo}"
         current_repo = f"{config.user_config.host_api}/repos/{u_repo}"
-        if not gitea.repo.uses_language(current_repo, 'Python'):
+        if not gitea.repo.uses_language(current_repo, "Python"):
             continue
 
         try:
@@ -54,5 +55,5 @@ def main(pkg: str) -> None:
     search_repos_for_dep(pkg)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     oldmain()

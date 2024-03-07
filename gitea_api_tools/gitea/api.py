@@ -13,7 +13,7 @@ try:
     session.headers = {
         "Authorization": f"token {getattr(config.user_config, 'token')}",
         "Accept": "application/json",
-        }
+    }
 except AttributeError:
     config.logger.error("Could not load token. gitea.api disabled")
     REQUESTS_AVAILABLE = False
@@ -90,8 +90,8 @@ def decode(response: str) -> str:
         raise ValueError(f"{response} is missing required key 'content'")
 
     known_encodings = {
-        'base64': lambda text: b64decode(text).decode(),
-        }
+        "base64": lambda text: b64decode(text).decode(),
+    }
 
     if encoding not in known_encodings:
         raise ValueError(f"Unknown encoding {encoding}")
@@ -111,13 +111,14 @@ def list_repos() -> REPOS:
     """
     try:
         search_archived_repos = getattr(
-            config.user_config, 'search_archived_repos')
+            config.user_config, "search_archived_repos"
+        )
     except AttributeError as e:
         raise RuntimeError("Configuration is malformed") from e
 
     url = f"repos/search?archived={search_archived_repos}"
 
-    uid = getattr(config.user_config, 'uid', None)
+    uid = getattr(config.user_config, "uid", None)
     if uid:
         url = f"{url}&uid={uid}"
 
@@ -134,7 +135,7 @@ def list_repos() -> REPOS:
             raise RuntimeError(ERR_NO_ENCODING.format("fetching repos"))
 
         try:
-            repos = json.loads(response)['data']
+            repos = json.loads(response)["data"]
         except KeyError:
             raise RuntimeError(f"Page {page} of repositories is missing data")
 
@@ -144,4 +145,4 @@ def list_repos() -> REPOS:
         else:
             repos_left = False
 
-    return [repo["full_name"].split('/') for repo in all_repos]
+    return [repo["full_name"].split("/") for repo in all_repos]

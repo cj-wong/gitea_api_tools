@@ -20,11 +20,13 @@ def get_os_linux_dirs(project_name: str) -> _PATHS:
 
     """
     config_root = Path(
-        os.environ.get('XDG_CONFIG_HOME', '~/.config')).expanduser()
+        os.environ.get("XDG_CONFIG_HOME", "~/.config")
+    ).expanduser()
     config_dir = config_root / project_name
     config_dir.mkdir(parents=True, exist_ok=True)
     cache_root = Path(
-        os.environ.get('XDG_STATE_HOME', '~/.local/state')).expanduser()
+        os.environ.get("XDG_STATE_HOME", "~/.local/state")
+    ).expanduser()
     cache_dir = cache_root / project_name
     cache_dir.mkdir(parents=True, exist_ok=True)
     return (config_dir, cache_dir)
@@ -45,9 +47,10 @@ def get_os_windows_dirs(project_name: str) -> _PATHS:
     """
     win32_err = (
         "Your OS reported itself as Windows but"
-        " it's missing environment variables")
+        " it's missing environment variables"
+    )
     try:
-        data_root = Path(os.environ.get('LOCALAPPDATA', 'an_invalid_path'))
+        data_root = Path(os.environ.get("LOCALAPPDATA", "an_invalid_path"))
     except TypeError as e:
         raise RuntimeError(win32_err) from e
     data_dir = data_root / project_name

@@ -9,14 +9,17 @@ config.validate()
 
 
 parser = argparse.ArgumentParser(
-    description="Python package tracker for Gitea API")
+    description="Python package tracker for Gitea API"
+)
 parser.add_argument("package", type=str, help="package name on PyPI")
 parser.add_argument("version", type=str, help="package version")
 
 
 def get_outdated_dep_version(
-        dependencies: package.formats.REQUIREMENTS, p_name: str,
-        p_ver: package.version.Version) -> str:
+    dependencies: package.formats.REQUIREMENTS,
+    p_name: str,
+    p_ver: package.version.Version,
+) -> str:
     """Get the requirement version, if present.
 
     Args:
@@ -57,8 +60,8 @@ def get_outdated_dep_version(
 
 
 def compare_dependency(
-        repos: gitea.api.REPOS, p_name: str, p_ver: package.version.Version
-        ) -> None:
+    repos: gitea.api.REPOS, p_name: str, p_ver: package.version.Version
+) -> None:
     """Compare dependency against Python-only repositories.
 
     Args:
@@ -74,7 +77,7 @@ def compare_dependency(
     for user, repo in repos:
         u_repo = f"{user}/{repo}"
         current_repo = f"{config.user_config.host_api}/repos/{u_repo}"
-        if not gitea.repo.uses_language(current_repo, 'Python'):
+        if not gitea.repo.uses_language(current_repo, "Python"):
             continue
 
         try:
@@ -125,5 +128,5 @@ def main(pkg: str, version: str) -> None:
     compare_dependency(repos, pkg, package.version.Version(version))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     oldmain()
