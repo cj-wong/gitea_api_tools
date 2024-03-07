@@ -2,7 +2,7 @@ import argparse
 
 from . import config
 from . import gitea
-from . import language
+from . import package
 
 
 config.validate()
@@ -20,15 +20,15 @@ def search_repos_for_dep(dependency: str) -> None:
         dependency: Python dependency
 
     """
-    repos = gitea.list_repos()
+    repos = gitea.api.list_repos()
     for user, repo in repos:
         u_repo = f"{user}/{repo}"
         current_repo = f"{config.user_config.host_api}/repos/{u_repo}"
-        if not gitea.is_repo_using_language(current_repo, 'Python'):
+        if not gitea.repo.uses_language(current_repo, 'Python'):
             continue
 
         try:
-            requirements = language.python.process_requirements(current_repo)
+            requirements = package.python.process_requirements(current_repo)
         except ValueError:
             # Silently ignore missing requirements
             continue

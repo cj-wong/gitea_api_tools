@@ -1,10 +1,9 @@
 import argparse
 
-from . import get_deploy_keys
-from . import get_user_id
-from . import get_outdated_python_deps
-from . import get_python_dep_repos
+from . import gitea
+from . import package
 from .config import configure
+from .package import version
 
 
 parser = argparse.ArgumentParser()
@@ -18,7 +17,8 @@ parser_user_id = subparsers.add_parser("user_id")
 # Sub-commands that require at least one argument
 parser_python = subparsers.add_parser("python")
 parser_python.add_argument("package")
-parser_python.add_argument("-v", "--version")
+parser_python.add_argument(
+    "-v", "--version", type=version.Version, default=version.SENTINEL_VERSION)
 
 
 def main() -> None:
@@ -28,14 +28,11 @@ def main() -> None:
         case "configure":
             configure.configure_interactively()
         case "deploy_keys":
-            get_deploy_keys.main()
+            gitea.repo.deploy_key.get_keyed_repos()
         case "user_id":
-            get_user_id.main()
+            gitea.user.store_retrieved_id()
         case "python":
-            if args.version:
-                get_outdated_python_deps.main(args.package, args.version)
-            else:
-                get_python_dep_repos.main(args.package)
+            package.python.list_dependent_repos(args.package, args.version)
         case _:
             raise RuntimeError("Invalid option provided")
 

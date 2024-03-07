@@ -35,30 +35,31 @@ def main() -> None:
     repo_keys: REPO_KEYS = defaultdict(list)
     pubkey_words = 2
 
-    repos = gitea.list_repos()
+    repos = gitea.api.list_repos()
     for user, repo in repos:
         u_repo = f"{user}/{repo}"
         curr_repo_keys = f"{config.user_config.host_api}/repos/{u_repo}/keys"
-        response = gitea.get_url(curr_repo_keys)
-        if response.status_code != 200:
+        try:
+            response = gitea.api.get_response(curr_repo_keys)
+        except FileNotFoundError:
             config.logger.warning(f"Could not access keys for {u_repo}")
             continue
-        elif not response.encoding:
+        except ValueError:
             config.logger.error(
-                gitea.NO_ENCODING.format("getting deploy keys"))
+                gitea.api.ERR_NO_ENCODING.format("getting deploy keys"))
             raise ValueError("Could not decode file")
 
-        contents = response.content.decode(response.encoding).strip()
-        keys = json.loads(contents)
+        keys = json.loads(response)
         for key in keys:
             if type(key) is not dict:
                 config.logger.warning(f"{u_repo} response was not a dict/JSON")
                 continue
-            fingerprint = key["fingerprint"]
             try:
+                fingerprint = key["fingerprint"]
                 pubkey = ' '.join(key["key"].split()[:pubkey_words])
             except KeyError as e:
-                print(repo, key)
+                config.logger.error(
+                    f"Couldn't find fingerprint or pubkey for {key} in {repo}")
                 raise e
             rp_name = (fingerprint, pubkey)
             repo_keys[rp_name].append(u_repo)

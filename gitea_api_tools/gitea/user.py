@@ -1,13 +1,10 @@
 import json
 
-from . import config
-from . import gitea
+from . import api
+from .. import config
 
 
-config.validate()
-
-
-def get_user_id() -> int:
+def get_id() -> int:
     """Get the user ID.
 
     Returns:
@@ -17,24 +14,23 @@ def get_user_id() -> int:
         RuntimeError: could not get encoding
 
     """
-    url = f"{config.user_config.host_api}/user"
     try:
-        response = gitea.api.get_response(url)
+        response = api.get_response("user")
     except FileNotFoundError:
         raise RuntimeError("Could not user information")
     except ValueError:
-        raise RuntimeError(gitea.api.ERR_NO_ENCODING.format("user"))
+        raise RuntimeError(api.ERR_NO_ENCODING.format("user"))
 
     user = json.loads(response)
     try:
-        user_id = user['id']
+        return int(user['id'])
     except KeyError:
         raise RuntimeError("Could not get ID from response")
+    except (TypeError, ValueError) as e:
+        raise RuntimeError("The ID isn't a number") from e
 
-    return int(user_id)
 
-
-def main() -> None:
+def store_retrieved_id() -> None:
     """Get the user ID and optionally store it into the configuration."""
     old_uid = getattr(config.user_config, 'uid')
     if old_uid:
@@ -45,7 +41,7 @@ def main() -> None:
             config.logger.info("Stopped.")
             return
 
-    new_uid = get_user_id()
+    new_uid = get_id()
     config.logger.info(f"Your user ID is {new_uid}.")
     if old_uid and new_uid != old_uid:
         config.logger.warning(
@@ -65,7 +61,3 @@ def main() -> None:
         config.logger.info("User ID was stored in config.json.")
     else:
         config.logger.info("User ID was not stored.")
-
-
-if __name__ == '__main__':
-    main()

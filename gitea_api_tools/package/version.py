@@ -1,6 +1,9 @@
 import re
 
 
+VERSION_PATTERN = re.compile(r'^[0-9]+\.[0-9]+\.[0-9]+$')
+
+
 class Version:
     """Defines a version.
 
@@ -90,26 +93,17 @@ class Version:
 
         return False
 
-
-class NotFound(BaseException):
-    """No package matched."""
-
-    def __init__(self) -> None:
-        """Initialize with error message."""
-        super("Package was not found")
+    def __bool__(self) -> bool:
+        """Check if version is valid (i.e. not the sentinel version)."""
+        return self != SENTINEL_VERSION
 
 
-class MismatchedVersionFormat(ValueError):
+SENTINEL_VERSION = Version("0.0.0")
+
+
+class MismatchedFormat(ValueError):
     """Package had a different format and couldn't be directly compared."""
 
     def __init__(self) -> None:
         """Initialize with error message."""
-        super("Package version format could not be compared")
-
-
-class CouldNotParse(ValueError):
-    """Dependency did not match expected format."""
-
-    def __init__(self) -> None:
-        """Initialize with error message."""
-        super("Could not parse package name")
+        super().__init__("Package version format could not be compared")
