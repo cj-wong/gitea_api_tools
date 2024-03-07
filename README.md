@@ -16,7 +16,19 @@ The code was tested with the following:
 
 ## Setup
 
+### Using Poetry
+
 Run `poetry install` on the project root to get started. This will grant access to the `gitea-api` script. Once created, `gitea-api` can be sym-linked from wherever the environment is to a more convenient place like `~/.local/bin`.
+
+### Manual
+
+You can also run `pip install pyproject.toml`. Once installed, you can simply run `python3 -m gitea_api_tools` while in the project directory.
+
+## Configuration
+
+You can now run `gitea-api configure` to automatically configure your settings.
+
+### Manual (not recommended)
 
 Copy `config.json.example` and make `config.json`, replacing the temporary values:
 
