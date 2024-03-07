@@ -18,7 +18,7 @@ ERR_NO_FILE = (
 
 
 def uses_language(repo: str, language: str) -> bool:
-    """Check whether a repository is using a certain programming language.
+    """Check whether a repository is using the requested programming language.
 
     Args:
         repo: full repository name
@@ -43,7 +43,7 @@ def uses_language(repo: str, language: str) -> bool:
 
 
 def get_file_contents(repo: str, file: str) -> str:
-    """Get a file from a repository.
+    """Get contents of a file from a repository.
 
     Args:
         repo: full repository name
@@ -82,7 +82,7 @@ def get_all_python_pkg_files() -> Iterable[tuple[str, str, str]]:
         if not uses_language(u_repo, "Python"):
             continue
 
-        # It is possible for a Python project not to have either files, so
+        # It is possible for a Python repository not to have either files, so
         # no error message will be shown.
         for pkg_file in pkg_files:
             try:

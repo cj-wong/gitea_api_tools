@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [1.2.0] - 2024-03-06
 ### Changed
 - Python code is now formatted with `black`.
-- Users can now execute the code with `python3 -m gitea_api_tools` as an alternative to the `poetry` setup.
+- Users can now execute the module with `python3 -m gitea_api_tools` as an alternative to the `poetry` setup.
 - Combined `gitea_api_tools/language/` with `package.py`, since `language` has only worked with packages.
 - Instead of using a dummy argument, the main command now uses `dest=` in the sub-parser for identifying the executed sub-command.
 
