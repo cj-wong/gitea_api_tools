@@ -1,4 +1,5 @@
 import json
+import os
 import time
 from base64 import b64decode
 from typing import TypeAlias
@@ -111,9 +112,12 @@ def list_repos() -> Repos:
 
     """
     try:
-        search_archived_repos = getattr(
-            config.user_config, "search_archived_repos"
-        )
+        if "GITEA_API_SEARCH_ARCHIVED" in os.environ:
+            search_archived_repos = True
+        else:
+            search_archived_repos = getattr(
+                config.user_config, "search_archived_repos"
+            )
     except AttributeError as e:
         raise RuntimeError("Configuration is malformed") from e
 

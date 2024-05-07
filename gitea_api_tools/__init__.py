@@ -37,6 +37,8 @@ Quick start: run `gitea-api configure`.
 Environment variables can be used to temporarily override the configuration.
 
 - GITEA_API_USE_XDG_DIRS: use XDG directories on non-supported OSes
+- GITEA_API_SEARCH_ARCHIVED: override `search_archived_repos` in configuration;
+                             will search archived unconditionally
 
 """
 
