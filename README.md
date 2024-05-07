@@ -28,7 +28,7 @@ You can also run `pip install pyproject.toml`. Once installed, you can simply ru
 
 Create an access token. ([Reference][GITEA_API_TOKEN]) The minimum permissions used by this project are "Read" for both "Repository" and "User".
 
-You can now run `gitea-api configure` to interactively configure your settings.
+You can now run `gitea-api configure` to interactively configure your settings. For OS compatibility, check below.
 
 ### Manual (not recommended)
 
@@ -51,7 +51,9 @@ The settings file goes into a sub-directory named `gitea-api-tools` under your X
 
 #### MacOS and other OSes
 
-Currently unsupported, as I'm unsure what paths are analogous to those provided.
+These OSes are currently unsupported, as I'm unsure what paths are analogous to those provided. I've read conflicting information; some suggest using either the `~/Library` directory, while others say to use XDG directories.
+
+If, however, you would like to use XDG directories, set `GITEA_API_USE_XDG_DIRS` to anything truth-y, like `1`. (e.g. `export GITEA_API_USE_XDG_DIRS=1`) Ensure the directories parent directories (`~/.config`, `~/.local/state`) exist prior to running.
 
 ## Disclaimer
 

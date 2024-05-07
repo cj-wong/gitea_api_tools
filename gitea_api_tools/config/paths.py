@@ -6,8 +6,8 @@ from pathlib import Path
 _PATHS = tuple[Path, Path]
 
 
-def get_os_linux_dirs(project_name: str) -> _PATHS:
-    """Get the directories for Linux (and Cygwin).
+def get_xdg_dirs(project_name: str) -> _PATHS:
+    """Get the directories of the XDG spec.
 
     Args:
         project_name: name of project
@@ -61,6 +61,9 @@ def get_os_windows_dirs(project_name: str) -> _PATHS:
 def get_os_dirs(project_name: str) -> _PATHS:
     """Get directories corresponding to OS configuration/cache.
 
+    Set `GITEA_API_USE_XDG_DIRS` to use XDG directories even if your OS may not
+    be directly supported.
+
     Returns:
         _PATHS:
 
@@ -76,9 +79,15 @@ def get_os_dirs(project_name: str) -> _PATHS:
                 variable: LocalAppData.
 
     """
-    if sys.platform.startswith("linux") or sys.platform.startswith("cygwin"):
-        return get_os_linux_dirs(project_name)
-    elif sys.platform.startswith("win32"):
+    use_xdg_dirs = (
+        sys.platform.startswith("linux"),
+        sys.platform.startswith("cygwin"),
+        os.environ.get("GITEA_API_USE_XDG_DIRS", False),
+    )
+
+    if sys.platform.startswith("win32"):
         return get_os_windows_dirs(project_name)
+    elif any(use_xdg_dirs):
+        return get_xdg_dirs(project_name)
 
     raise RuntimeError("This project does not support your operating system")

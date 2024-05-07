@@ -23,7 +23,27 @@ def wrap_subparser_list_python(args: argparse.Namespace) -> None:
     package.python.list_dependent_repos(args.package, args.version)
 
 
-parser = argparse.ArgumentParser(description="A toolbox for Gitea API")
+# End of wrapper functions.
+
+command_description = """\
+A toolbox for Gitea API
+-----------------------
+
+Quick start: run `gitea-api configure`.
+
+    This will interactively fill out the required configuration file, storing
+    it in an OS-dependent configuration.
+
+Environment variables can be used to temporarily override the configuration.
+
+- GITEA_API_USE_XDG_DIRS: use XDG directories on non-supported OSes
+
+"""
+
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description=command_description,
+)
 parser.add_argument(
     "--json",
     action="store_true",
