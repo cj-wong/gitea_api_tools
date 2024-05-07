@@ -47,7 +47,8 @@ class TestVersion(unittest.TestCase):
 
         """
         for left, right in self.comparison_versions:
-            self.assertGreater(Version(left), Version(right))
+            with self.subTest(left=left, right=right):
+                self.assertGreater(Version(left), Version(right))
 
     def test_version_less(self) -> None:
         """Test that one version is less than the other.
@@ -64,4 +65,5 @@ class TestVersion(unittest.TestCase):
         """
         # Unlike test_version_greater, right and left are swapped.
         for right, left in self.comparison_versions:
-            self.assertLess(Version(left), Version(right))
+            with self.subTest(left=left, right=right):
+                self.assertLess(Version(left), Version(right))
