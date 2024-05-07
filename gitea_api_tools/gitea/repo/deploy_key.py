@@ -67,7 +67,7 @@ def get_repo_keys(user_repo: str) -> list[tuple[str, str]]:
 
     key_data = json.loads(response)
     for key in key_data:
-        if type(key) is not dict:
+        if not isinstance(key, dict):
             config.logger.warning(f"{user_repo} response was not a dict/JSON")
             continue
         fingerprint = key["fingerprint"]

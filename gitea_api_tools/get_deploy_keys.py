@@ -52,7 +52,7 @@ def main() -> None:
 
         keys = json.loads(response)
         for key in keys:
-            if type(key) is not dict:
+            if not isinstance(key, dict):
                 config.logger.warning(f"{u_repo} response was not a dict/JSON")
                 continue
             try:
