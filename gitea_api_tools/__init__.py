@@ -24,39 +24,67 @@ def wrap_subparser_list_python(args: argparse.Namespace) -> None:
 
 
 parser = argparse.ArgumentParser(description="A toolbox for Gitea API")
+parser.add_argument(
+    "--json",
+    action="store_true",
+    default=False,
+    help="whether to output as JSON (default: False)",
+)
 subparsers = parser.add_subparsers(required=True)
 
-# Sub-commands that take no arguments
-parser_configure = subparsers.add_parser("configure")
+# one-off commands
+parser_configure = subparsers.add_parser(
+    "configure", help="Configure this script"
+)
 parser_configure.set_defaults(func=wrap_subparser_configure)
 
-parser_deploy_keys = subparsers.add_parser(
-    "deploy_keys",
-    aliases=["dep", "keys", "dk"],
-    description="View deploy keys",
-)
-parser_deploy_keys.set_defaults(func=wrap_subparser_get_deploykeys)
+parser_whoami = subparsers.add_parser("whoami", help="Get your user ID")
+parser_whoami.set_defaults(func=wrap_subparser_get_uid)
 
-parser_user_id = subparsers.add_parser(
-    "user_id", aliases=["uid", "id", "whoami"], description="View your user ID"
+# get ...
+parser_get = subparsers.add_parser("get", help="Get individual items")
+parser_get_subparsers = parser_get.add_subparsers(required=True)
+# get deploy-keys
+parser_get_deploykeys = parser_get_subparsers.add_parser(
+    "deploy-keys",
+    aliases=["keys", "dk"],
+    help="Get deploy keys",
+    description="Get deploy keys alongside their respective repositories",
 )
-parser_user_id.set_defaults(func=wrap_subparser_get_uid)
+parser_get_deploykeys.set_defaults(func=wrap_subparser_get_deploykeys)
+# get user-id
+parser_get_uid = parser_get_subparsers.add_parser(
+    "user-id",
+    aliases=["uid", "id"],
+    help="Get your user ID",
+    description="Get your user ID and optionally save to configuration",
+)
+parser_get_uid.set_defaults(func=wrap_subparser_get_uid)
 
-# Sub-commands that require at least one argument
-parser_python = subparsers.add_parser(
-    "python", aliases=["py"], description="View your Python repositories"
+# get dependencies ...
+parser_get_deps = parser_get_subparsers.add_parser(
+    "dependencies",
+    aliases=["dep", "deps", "dependency"],
+    help="Get repositories containing dependencies by programming language",
 )
-parser_python.add_argument(
+parser_get_dep_langs = parser_get_deps.add_subparsers(required=True)
+# get dependencies python
+parser_get_dep_python = parser_get_dep_langs.add_parser(
+    "python",
+    aliases=["py"],
+    help="Get repositories with Python dependency",
+)
+parser_get_dep_python.add_argument(
     "package", help="dependent package (e.g. from PyPI)"
 )
-parser_python.add_argument(
+parser_get_dep_python.add_argument(
     "-v",
     "--version",
     type=version.Version,
     default=version.SENTINEL_VERSION,
     help="optional version string like 1.0.0; don't prefix with 'v'",
 )
-parser_python.set_defaults(func=wrap_subparser_list_python)
+parser_get_dep_python.set_defaults(func=wrap_subparser_list_python)
 
 
 def main() -> None:
