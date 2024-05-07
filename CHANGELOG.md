@@ -3,6 +3,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.2.1] - 2024-05-07
+### Changed
+- `tests`: Use `self.subTest()` whenever possible, to clearly mark separate tests.
+- Replaced `flake8` and `black` with `ruff`. `ruff check` is also automatically run with `hooks`.
+- Types are now declared in `PascalCase`, with explicit hinting of `typing.TypeAlias`.
+
+### Fixed
+- Fixed aliases not calling their respective functions. This was because when using `dest` with a set of sub-parsers, `dest` could be filled by both the exact sub-parser or its aliases. I tried to match against the sub-parser name only. For more details, check out commit 74e494af2266b7315005270b102ae07bbcc11cb9.
+
+### Security
+- Bumped dependencies, primarily `idna` to `3.7`.
+
 ## [1.2.0] - 2024-03-06
 ### Changed
 - Python code is now formatted with `black`.
