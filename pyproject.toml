@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gitea-api-tools"
-version = "1.2.0"
+version = "1.2.1"
 description = ""
 authors = ["CJ Wong <cj-wong@users.noreply.github.com>"]
 license = "MIT"
@@ -18,10 +18,6 @@ ruff = "^0.4.3"
 
 [tool.poetry.scripts]
 gitea-api = 'gitea_api_tools:main'
-get-deploy-keys = 'gitea_api_tools.get_deploy_keys:main'
-get-outdated-python-deps = 'gitea_api_tools.get_outdated_python_deps:main'
-get-python-deps = 'gitea_api_tools.get_python_dep_repos:main'
-get-user-id = 'gitea_api_tools.get_user_id:main'
 
 [tool.ruff]
 line-length = 79
