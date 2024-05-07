@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gitea-api-tools"
-version = "0.4.0"
+version = "1.2.0"
 description = ""
 authors = ["CJ Wong <cj-wong@users.noreply.github.com>"]
 license = "MIT"
@@ -12,10 +12,9 @@ python = "^3.11"
 requests = "^2.28.2"
 
 [tool.poetry.group.dev.dependencies]
-flake8 = "^6.0.0"
 mypy = "^1.0.1"
-black = "^24.2.0"
 types-requests = "^2.31.0.20240218"
+ruff = "^0.4.3"
 
 [tool.poetry.scripts]
 gitea-api = 'gitea_api_tools:main'
@@ -24,8 +23,11 @@ get-outdated-python-deps = 'gitea_api_tools.get_outdated_python_deps:main'
 get-python-deps = 'gitea_api_tools.get_python_dep_repos:main'
 get-user-id = 'gitea_api_tools.get_user_id:main'
 
-[tool.black]
+[tool.ruff]
 line-length = 79
+
+[tool.ruff.lint]
+select = ["E", "F"]
 
 [build-system]
 requires = ["poetry-core"]
