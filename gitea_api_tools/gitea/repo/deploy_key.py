@@ -1,5 +1,6 @@
 import json
 from collections import defaultdict
+from typing import TypeAlias
 
 from .. import api
 from ..api import config
@@ -8,7 +9,7 @@ from ..api import config
 config.validate()
 
 
-REPOS_KEYS = dict[tuple[str, str], list[str]]
+ReposKeys: TypeAlias = dict[tuple[str, str], list[str]]
 KEY_MESSAGE = """
 Public Key:     {}
 Fingerprint:    {}
@@ -23,7 +24,7 @@ EX_REPO_KEYS = (
 )
 
 
-def list_keyed_repos(repos_keys: REPOS_KEYS) -> None:
+def list_keyed_repos(repos_keys: ReposKeys) -> None:
     """List the repositories that belong to each key from input.
 
     Args:
@@ -83,7 +84,7 @@ def get_repo_keys(user_repo: str) -> list[tuple[str, str]]:
 
 def get_keyed_repos() -> None:
     """Get the deploy keys for all repositories."""
-    repos_keys: REPOS_KEYS = defaultdict(list)
+    repos_keys: ReposKeys = defaultdict(list)
 
     repos = api.list_repos()
     for user, repo in repos:

@@ -16,7 +16,7 @@ parser.add_argument("version", type=str, help="package version")
 
 
 def get_outdated_dep_version(
-    dependencies: package.formats.REQUIREMENTS,
+    dependencies: package.formats.Requirements,
     p_name: str,
     p_ver: package.version.Version,
 ) -> str:
@@ -60,7 +60,7 @@ def get_outdated_dep_version(
 
 
 def compare_dependency(
-    repos: gitea.api.REPOS, p_name: str, p_ver: package.version.Version
+    repos: gitea.api.Repos, p_name: str, p_ver: package.version.Version
 ) -> None:
     """Compare dependency against Python-only repositories.
 

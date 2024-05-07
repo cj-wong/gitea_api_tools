@@ -1,6 +1,7 @@
 import json
 import time
 from base64 import b64decode
+from typing import TypeAlias
 
 import requests
 
@@ -21,7 +22,7 @@ else:
     REQUESTS_AVAILABLE = True
 
 
-REPOS = list[tuple[str, str]]
+Repos: TypeAlias = list[tuple[str, str]]
 
 ERR_NO_TOKEN = "Can't execute requests without token"
 ERR_NO_ENCODING = "No encoding was detected when {}"
@@ -99,11 +100,11 @@ def decode(response: str) -> str:
     return known_encodings[encoding](content).strip()
 
 
-def list_repos() -> REPOS:
+def list_repos() -> Repos:
     """List the repositories on the host.
 
     Returns:
-        REPOS: list of repositories in the format (owner, repo_name)
+        Repos: list of repositories in the format (owner, repo_name)
 
     Raises:
         RuntimeError: no encoding detected in request; request may be invalid

@@ -6,7 +6,7 @@ from .. import gitea
 from .. import package
 
 
-def process_requirementstxt_OLD(repo: str) -> package.formats.REQUIREMENTS:
+def process_requirementstxt_OLD(repo: str) -> package.formats.Requirements:
     """Process Python requirements in the file format requirements.txt.
 
     requirements.txt is typically generated from using `pip freeze`.
@@ -15,7 +15,7 @@ def process_requirementstxt_OLD(repo: str) -> package.formats.REQUIREMENTS:
         repo: repository URL
 
     Returns:
-        package.formats.REQUIREMENTS: dictionary of packages to versions
+        package.formats.Requirements: dictionary of packages to versions
 
     Raises:
         ValueError: file could not be read or is invalid
@@ -32,7 +32,7 @@ def process_requirementstxt_OLD(repo: str) -> package.formats.REQUIREMENTS:
         # Unknown encoding
         raise e
 
-    requirements: package.formats.REQUIREMENTS = {}
+    requirements: package.formats.Requirements = {}
 
     for req in contents.split("\n"):
         try:
@@ -44,7 +44,7 @@ def process_requirementstxt_OLD(repo: str) -> package.formats.REQUIREMENTS:
     return requirements
 
 
-def process_poetrylock_OLD(repo: str) -> package.formats.REQUIREMENTS:
+def process_poetrylock_OLD(repo: str) -> package.formats.Requirements:
     """Process Python requirements in the file format poetry.lock.
 
     poetry.lock is typically generated from using `poetry install`.
@@ -53,7 +53,7 @@ def process_poetrylock_OLD(repo: str) -> package.formats.REQUIREMENTS:
         repo: repository URL
 
     Returns:
-        package.formats.REQUIREMENTS: dictionary of packages to versions
+        package.formats.Requirements: dictionary of packages to versions
 
     Raises:
         ValueError: one of several reasons:
@@ -74,7 +74,7 @@ def process_poetrylock_OLD(repo: str) -> package.formats.REQUIREMENTS:
         raise e
 
     poetry_reqs = tomllib.loads(contents)
-    requirements: package.formats.REQUIREMENTS = {}
+    requirements: package.formats.Requirements = {}
 
     for requirement in poetry_reqs["package"]:
         name = requirement["name"]
@@ -84,7 +84,7 @@ def process_poetrylock_OLD(repo: str) -> package.formats.REQUIREMENTS:
     return requirements
 
 
-def process_requirements(repo: str) -> package.formats.REQUIREMENTS:
+def process_requirements(repo: str) -> package.formats.Requirements:
     """Process requirements in any and all formats.
 
     This function is a wrapper for processing the requirements in a set
@@ -101,7 +101,7 @@ def process_requirements(repo: str) -> package.formats.REQUIREMENTS:
         repo: repository URL
 
     Returns:
-        package.formats.REQUIREMENTS: dictionary of packages to versions
+        package.formats.Requirements: dictionary of packages to versions
 
     Raises:
         ValueError: no requirements could be parsed
@@ -120,7 +120,7 @@ def process_requirements(repo: str) -> package.formats.REQUIREMENTS:
     raise ValueError("Could not process any requirements at all.")
 
 
-def process_requirements_txt(contents: str) -> package.formats.REQUIREMENTS:
+def process_requirements_txt(contents: str) -> package.formats.Requirements:
     """Process Python requirements in the file format requirements.txt.
 
     requirements.txt is typically generated from using `pip freeze`.
@@ -129,10 +129,10 @@ def process_requirements_txt(contents: str) -> package.formats.REQUIREMENTS:
         contents: contents of package file
 
     Returns:
-        package.formats.REQUIREMENTS: dictionary of packages to versions
+        package.formats.Requirements: dictionary of packages to versions
 
     """
-    requirements: package.formats.REQUIREMENTS = {}
+    requirements: package.formats.Requirements = {}
 
     for req in contents.split("\n"):
         try:
@@ -144,7 +144,7 @@ def process_requirements_txt(contents: str) -> package.formats.REQUIREMENTS:
     return requirements
 
 
-def process_poetry_lock(contents: str) -> package.formats.REQUIREMENTS:
+def process_poetry_lock(contents: str) -> package.formats.Requirements:
     """Process Python requirements in the file format poetry.lock.
 
     poetry.lock is typically generated from using `poetry install`.
@@ -153,11 +153,11 @@ def process_poetry_lock(contents: str) -> package.formats.REQUIREMENTS:
         contents: contents of package file
 
     Returns:
-        package.formats.REQUIREMENTS: dictionary of packages to versions
+        package.formats.Requirements: dictionary of packages to versions
 
     """
     poetry_reqs = tomllib.loads(contents)
-    requirements: package.formats.REQUIREMENTS = {}
+    requirements: package.formats.Requirements = {}
 
     for requirement in poetry_reqs["package"]:
         name = requirement["name"]
